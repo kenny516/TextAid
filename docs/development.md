@@ -3,6 +3,7 @@
 ## 🛠️ Configuration de l'Environnement
 
 ### Prérequis
+
 - **Git** : Version 2.40+
 - **Chrome** : Version 100+ avec mode développeur
 - **Éditeur** : VS Code recommandé avec extensions :
@@ -39,6 +40,7 @@ main (production)
 ### Conventions de Nommage
 
 #### Branches
+
 - `feat/` : Nouvelles fonctionnalités
 - `fix/` : Corrections de bugs
 - `hotfix/` : Corrections urgentes production
@@ -47,6 +49,7 @@ main (production)
 - `test/` : Ajout ou modification de tests
 
 #### Commits (Conventional Commits)
+
 ```bash
 feat: ajouter floating toolbar avec glassmorphism
 fix: corriger l'affichage des modales sur Firefox
@@ -104,6 +107,7 @@ git push origin feat/nom-fonctionnalite
 ```
 
 Ensuite, créer la PR sur GitHub :
+
 - Base : `dev`
 - Compare : `feat/nom-fonctionnalite`
 - Template de description (voir ci-dessous)
@@ -112,28 +116,34 @@ Ensuite, créer la PR sur GitHub :
 
 ```markdown
 ## 🎯 Description
+
 Brève description de la fonctionnalité ou correction
 
 ## ✅ Type de Changement
+
 - [ ] 🐛 Bug fix (correction non-breaking)
 - [ ] ✨ Nouvelle fonctionnalité (changement non-breaking)
 - [ ] 💥 Breaking change (correction ou fonctionnalité breaking)
 - [ ] 📚 Documentation uniquement
 
 ## 🧪 Tests Effectués
+
 - [ ] Tests manuels sur Chrome
 - [ ] Tests de régression
 - [ ] Tests sur différents sites web
 - [ ] Vérification du design system
 
 ## 📱 Screenshots
+
 [Ajouter des screenshots si applicable]
 
 ## 🔗 Issues Liées
+
 Closes #123
 Relates to #456
 
 ## ✅ Checklist
+
 - [ ] Mon code suit les guidelines du projet
 - [ ] J'ai effectué une auto-review
 - [ ] J'ai commenté les parties complexes
@@ -147,17 +157,20 @@ Relates to #456
 ### Tests Manuels
 
 1. **Chargement Extension**
+
 ```bash
 # Recharger l'extension
 powershell -ExecutionPolicy Bypass -File "reload-extension.ps1"
 ```
 
 2. **Tests Fonctionnels**
+
 - Ouvrir `debug-test.html`
 - Tester chaque fonctionnalité
 - Vérifier sur différents sites (Google, GitHub, etc.)
 
 3. **Tests Design**
+
 - Vérifier le design system
 - Tester les animations
 - Contrôler la compatibilité mobile
@@ -165,22 +178,25 @@ powershell -ExecutionPolicy Bypass -File "reload-extension.ps1"
 ### Debug et Dépannage
 
 #### Console Chrome DevTools
+
 ```javascript
 // Vérifier le chargement de l'extension
-console.log('TextAid loaded:', !!window.textAid);
+console.log("TextAid loaded:", !!window.textAid);
 
 // Vérifier les styles CSS
-getComputedStyle(document.querySelector('.textaid-floating-toolbar'));
+getComputedStyle(document.querySelector(".textaid-floating-toolbar"));
 ```
 
 #### Erreurs Communes
 
 1. **Extension non chargée**
+
    - Vérifier le manifest.json
    - Recharger l'extension
    - Vérifier les permissions
 
 2. **Styles non appliqués**
+
    - Forcer le rechargement CSS
    - Vérifier les conflits de styles
    - Utiliser les styles inline si nécessaire
@@ -219,6 +235,7 @@ zip -r textaid-v2.0.0.zip . -x "*.git*" "docs/*" "*.md" "debug-*"
 ## 🔧 Configuration VS Code
 
 ### Extensions Recommandées
+
 ```json
 {
   "recommendations": [
@@ -232,6 +249,7 @@ zip -r textaid-v2.0.0.zip . -x "*.git*" "docs/*" "*.md" "debug-*"
 ```
 
 ### Settings
+
 ```json
 {
   "editor.formatOnSave": true,
@@ -246,18 +264,21 @@ zip -r textaid-v2.0.0.zip . -x "*.git*" "docs/*" "*.md" "debug-*"
 ## 🎯 Bonnes Pratiques
 
 ### Code Quality
+
 - **Noms explicites** : Variables et fonctions descriptives
 - **Commentaires** : Expliquer le "pourquoi", pas le "quoi"
 - **Modularité** : Fonctions courtes et spécialisées
 - **Consistency** : Suivre les conventions établies
 
 ### Git Workflow
+
 - **Commits atomiques** : Un changement = un commit
 - **Messages clairs** : Décrire l'impact du changement
 - **Branches courtes** : Merger rapidement
 - **Historique propre** : Rebase avant merge si nécessaire
 
 ### Testing
+
 - **Test early, test often** : Tester à chaque modification
 - **Cross-browser** : Vérifier sur différents navigateurs
 - **Real conditions** : Tester sur vrais sites web
@@ -268,11 +289,13 @@ zip -r textaid-v2.0.0.zip . -x "*.git*" "docs/*" "*.md" "debug-*"
 ## 🆘 Support
 
 ### Problèmes Communs
+
 - [Issues GitHub](https://github.com/kenny516/textaid-extension/issues)
 - Documentation technique dans `/docs`
 - Changelog pour historique des modifications
 
 ### Contact Développement
+
 - **GitHub** : [@kenny516](https://github.com/kenny516)
 - **Issues** : Créer un ticket sur GitHub
 - **Discussions** : GitHub Discussions du projet

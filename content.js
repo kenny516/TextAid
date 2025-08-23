@@ -141,7 +141,7 @@ class TextAidContent {
         // Position toolbar avec styles agressifs pour assurer l'affichage
         this.floatingToolbar.style.cssText = `
             position: absolute !important;
-            top: ${window.scrollY + rect.top - 40}px !important;
+            top: ${window.scrollY + rect.top - 56}px !important;
             left: ${window.scrollX + rect.left}px !important;
             z-index: 2147483647 !important;
             display: flex !important;
@@ -149,13 +149,13 @@ class TextAidContent {
             visibility: visible !important;
             opacity: 1 !important;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-            background: rgba(255, 255, 255, 0.95) !important;
-            backdrop-filter: blur(12px) !important;
-            border: 1px solid rgba(255, 255, 255, 0.2) !important;
-            border-radius: 8px !important;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
-            padding: 8px !important;
-            gap: 4px !important;
+            background: rgba(255, 255, 255, 0.98) !important;
+            backdrop-filter: blur(16px) !important;
+            border: 1.5px solid #e5e5e5 !important;
+            border-radius: 12px !important;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.10) !important;
+            padding: 12px !important;
+            gap: 12px !important;
             align-items: center !important;
             box-sizing: border-box !important;
         `;
@@ -170,14 +170,14 @@ class TextAidContent {
                 display: inline-flex !important;
                 align-items: center !important;
                 justify-content: center !important;
-                width: 32px !important;
-                height: 32px !important;
-                padding: 6px !important;
-                margin: 0 !important;
+                min-width: 44px !important;
+                height: auto !important;
+                padding: 6px 12px !important;
+                gap: 8px !important;
                 border: none !important;
-                border-radius: 6px !important;
-                background: #007BFF !important;
-                color: white !important;
+                border-radius: 8px !important;
+                background: rgba(0,0,0,0.04) !important;
+                color: var(--textaid-color-primary, #2E2E2E) !important;
                 font-size: 14px !important;
                 font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
                 cursor: pointer !important;
@@ -187,17 +187,20 @@ class TextAidContent {
                 opacity: 1 !important;
                 pointer-events: auto !important;
                 z-index: 2147483647 !important;
+                white-space: nowrap !important;
             `;
 
-            // Ajouter les effets hover
+            // Hover effects using JS-friendly non-!important toggles
             button.addEventListener('mouseenter', () => {
-                button.style.background = '#0056b3 !important';
-                button.style.transform = 'translateY(-1px) !important';
+                button.style.background = 'var(--textaid-color-accent, #007BFF)';
+                button.style.color = 'var(--textaid-color-white, #fff)';
+                button.style.transform = 'translateY(-1px)';
             });
 
             button.addEventListener('mouseleave', () => {
-                button.style.background = '#007BFF !important';
-                button.style.transform = 'translateY(0) !important';
+                button.style.background = 'rgba(0,0,0,0.04)';
+                button.style.color = 'var(--textaid-color-primary, #2E2E2E)';
+                button.style.transform = 'translateY(0)';
             });
         });
 

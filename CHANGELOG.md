@@ -69,6 +69,7 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ---
 
 **Légende**
+
 - 🎨 **Ajouté** : Nouvelles fonctionnalités
 - 🔄 **Modifié** : Changements de fonctionnalités existantes
 - 🐛 **Corrigé** : Corrections de bugs
