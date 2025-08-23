@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test TextAid - Affichage Debug</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .selectable {
+            background: #e3f2fd;
+            padding: 15px;
+            border-left: 4px solid #2196f3;
+            margin: 10px 0;
+            cursor: text;
+        }
+
+        .debug-info {
+            background: #fff3e0;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+
+        .test-button {
+            background: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        .test-button:hover {
+            background: #0056b3;
+        }
+
+        #debug-output {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🔍 TextAid - Test d'Affichage et Debug</h1>
+
+    <div class="test-section">
+        <h2>Instructions</h2>
+        <div class="debug-info">
+            <strong>Comment tester :</strong><br>
+            1. Assurez-vous que l'extension TextAid est activée<br>
+            2. Sélectionnez le texte dans les zones bleues ci-dessous<br>
+            3. Le floating toolbar devrait apparaître automatiquement<br>
+            4. Utilisez les boutons de test pour vérifier les fonctionnalités
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Zone de Test - Sélection de Texte</h2>
+        <div class="selectable" id="test-text-1">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et
+            dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex
+            ea commodo consequat. Sélectionnez ce texte pour tester le floating toolbar de TextAid.
+        </div>
+
+        <div class="selectable" id="test-text-2">
+            L'intelligence artificielle révolutionne notre façon de travailler. Les outils comme TextAid permettent
+            d'améliorer la productivité en automatisant les tâches de rédaction et d'analyse de texte. Cette technologie
+            offre de nouvelles possibilités créatives pour les professionnels de tous secteurs.
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Tests Manuels</h2>
+        <button class="test-button" onclick="testConsoleLog()">Test Console</button>
+        <button class="test-button" onclick="testExtensionPresence()">Vérifier Extension</button>
+        <button class="test-button" onclick="testCSSInjection()">Test CSS</button>
+        <button class="test-button" onclick="simulateTextSelection()">Simuler Sélection</button>
+        <button class="test-button" onclick="clearDebug()">Effacer Debug</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Output Debug</h2>
+        <div id="debug-output">Prêt pour les tests...\n</div>
+    </div>
+
+    <script>
+        let debugOutput = document.getElementById('debug-output');
+
+        function addDebugMessage(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            debugOutput.innerHTML += `[${timestamp}] ${message}\n`;
+            debugOutput.scrollTop = debugOutput.scrollHeight;
+        }
+
+        function testConsoleLog() {
+            addDebugMessage('Test console - vérifiez la console du navigateur (F12)');
+            console.log('TextAid Debug: Test console log');
+            console.log('window.location:', window.location.href);
+            console.log('Extensions content scripts chargés:', document.querySelectorAll('script[src*="extension"]').length);
+        }
+
+        function testExtensionPresence() {
+            addDebugMessage('Vérification présence extension...');
+
+            // Vérifier si des éléments TextAid existent déjà
+            const existingToolbar = document.querySelector('.textaid-floating-toolbar');
+            const existingModal = document.querySelector('.textaid-modal');
+
+            addDebugMessage(`Toolbar existant: ${existingToolbar ? 'OUI' : 'NON'}`);
+            addDebugMessage(`Modal existante: ${existingModal ? 'OUI' : 'NON'}`);
+
+            // Vérifier les event listeners sur la page
+            const hasSelectionListener = window.getSelection().toString().length > 0;
+            addDebugMessage(`Sélection active: ${hasSelectionListener ? 'OUI' : 'NON'}`);
+        }
+
+        function testCSSInjection() {
+            addDebugMessage('Test injection CSS...');
+
+            // Créer un élément test avec les classes TextAid
+            const testElement = document.createElement('div');
+            testElement.className = 'textaid-floating-toolbar';
+            testElement.style.position = 'fixed';
+            testElement.style.top = '50px';
+            testElement.style.right = '20px';
+            testElement.style.padding = '10px';
+            testElement.style.background = 'red';
+            testElement.style.color = 'white';
+            testElement.style.zIndex = '999999';
+            testElement.textContent = 'TEST CSS';
+
+            document.body.appendChild(testElement);
+
+            setTimeout(() => {
+                const computedStyle = window.getComputedStyle(testElement);
+                addDebugMessage(`CSS appliqué - Background: ${computedStyle.background}`);
+                addDebugMessage(`CSS appliqué - Z-index: ${computedStyle.zIndex}`);
+
+                // Nettoyer
+                setTimeout(() => testElement.remove(), 3000);
+            }, 100);
+        }
+
+        function simulateTextSelection() {
+            addDebugMessage('Simulation sélection de texte...');
+
+            const testText = document.getElementById('test-text-1');
+            const range = document.createRange();
+            range.selectNodeContents(testText);
+
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+
+            addDebugMessage(`Texte sélectionné: "${selection.toString().substring(0, 50)}..."`);
+
+            // Déclencher les événements
+            const mouseUpEvent = new MouseEvent('mouseup', {
+                bubbles: true,
+                cancelable: true
+            });
+
+            document.dispatchEvent(mouseUpEvent);
+            testText.dispatchEvent(mouseUpEvent);
+
+            addDebugMessage('Événements mouseup déclenchés');
+        }
+
+        function clearDebug() {
+            debugOutput.innerHTML = 'Debug effacé...\n';
+        }
+
+        // Auto-test au chargement
+        window.addEventListener('load', () => {
+            addDebugMessage('Page chargée - TextAid Debug prêt');
+            setTimeout(() => {
+                testExtensionPresence();
+            }, 1000);
+        });
+
+        // Écouter les sélections
+        document.addEventListener('mouseup', () => {
+            const selection = window.getSelection().toString();
+            if (selection.length > 5) {
+                addDebugMessage(`Sélection détectée: "${selection.substring(0, 30)}..."`);
+            }
+        });
+
+        // Écouter les changements dans le DOM
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                mutation.addedNodes.forEach((node) => {
+                    if (node.nodeType === 1) { // Element node
+                        if (node.classList && (node.classList.contains('textaid-floating-toolbar') || node.classList.contains('textaid-modal'))) {
+                            addDebugMessage(`TextAid élément ajouté: ${node.className}`);
+                        }
+                    }
+                });
+            });
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    </script>
+</body>
+
+</html>

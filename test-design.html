@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test TextAid Design</title>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: #F8F8F8;
+            color: #2E2E2E;
+        }
+
+        .demo-section {
+            background: white;
+            padding: 32px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        h1,
+        h2 {
+            color: #2E2E2E;
+            margin-bottom: 16px;
+        }
+
+        .selectable-text {
+            background: #f0f8ff;
+            padding: 16px;
+            border-radius: 8px;
+            border-left: 4px solid #007BFF;
+            margin: 16px 0;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .instruction {
+            background: #e8f5e8;
+            padding: 12px;
+            border-radius: 6px;
+            color: #28A745;
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+
+        .note {
+            background: #fff3cd;
+            padding: 12px;
+            border-radius: 6px;
+            color: #856404;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="demo-section">
+        <h1>🎨 TextAid - Test du Nouveau Design Vercel</h1>
+        <p>Cette page vous permet de tester la nouvelle interface de TextAid avec son design inspiré de Vercel.</p>
+    </div>
+
+    <div class="demo-section">
+        <h2>📱 Test de l'Interface Popup</h2>
+        <div class="instruction">
+            ✅ Cliquez sur l'icône de l'extension dans la barre d'outils Chrome pour voir le nouveau popup avec :
+        </div>
+        <ul>
+            <li>Design moderne avec la palette de couleurs Vercel</li>
+            <li>Police Inter pour une typographie claire</li>
+            <li>Toggles modernes pour activer/désactiver les fournisseurs IA</li>
+            <li>Indicateurs de statut colorés</li>
+            <li>Interface responsive et élégante</li>
+        </ul>
+    </div>
+
+    <div class="demo-section">
+        <h2>🔄 Test du Floating Toolbar</h2>
+        <div class="instruction">
+            ✅ Sélectionnez le texte ci-dessous pour voir apparaître le nouveau toolbar flottant :
+        </div>
+        <div class="selectable-text">
+            L'intelligence artificielle transforme notre façon de travailler et de communiquer. Les outils d'IA
+            générative permettent d'automatiser de nombreuses tâches créatives et analytiques, offrant aux utilisateurs
+            la possibilité d'améliorer leur productivité et leur créativité. Cette révolution technologique ouvre de
+            nouvelles perspectives dans tous les domaines professionnels.
+        </div>
+        <div class="note">
+            Le toolbar devrait apparaître avec un effet glassmorphism (arrière-plan flou) et les nouveaux boutons au
+            design Vercel.
+        </div>
+    </div>
+
+    <div class="demo-section">
+        <h2>💫 Test des Modales</h2>
+        <div class="instruction">
+            ✅ Utilisez une des actions sur le texte sélectionné pour voir la nouvelle modale :
+        </div>
+        <div class="selectable-text">
+            TextAid utilise maintenant un système de design moderne avec des animations fluides, une typographie soignée
+            et une palette de couleurs cohérente. L'interface respecte les principes de design de Vercel pour une
+            expérience utilisateur optimale.
+        </div>
+        <div class="note">
+            La modale devrait s'afficher avec le nouveau design : fond semi-transparent, contenu centré avec
+            glassmorphism, bouton de fermeture moderne, et animations douces.
+        </div>
+    </div>
+
+    <div class="demo-section">
+        <h2>🎯 Fonctionnalités à Tester</h2>
+        <ul>
+            <li><strong>Popup :</strong> Configuration des fournisseurs IA avec le nouveau design</li>
+            <li><strong>Toolbar :</strong> Effet glassmorphism et positionnement intelligent</li>
+            <li><strong>Modales :</strong> Affichage des résultats avec la nouvelle interface</li>
+            <li><strong>Animations :</strong> Transitions fluides entre les états</li>
+            <li><strong>Responsive :</strong> Adaptation à différentes tailles d'écran</li>
+        </ul>
+    </div>
+
+    <div class="demo-section">
+        <h2>🎨 Palette de Couleurs Vercel</h2>
+        <div
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 16px; margin: 16px 0;">
+            <div style="background: #2E2E2E; color: white; padding: 16px; border-radius: 8px; text-align: center;">
+                <div style="font-weight: 600;">#2E2E2E</div>
+                <div style="font-size: 12px; opacity: 0.8;">Primary</div>
+            </div>
+            <div
+                style="background: #F8F8F8; color: #2E2E2E; padding: 16px; border-radius: 8px; text-align: center; border: 1px solid #e0e0e0;">
+                <div style="font-weight: 600;">#F8F8F8</div>
+                <div style="font-size: 12px; opacity: 0.8;">Background</div>
+            </div>
+            <div style="background: #007BFF; color: white; padding: 16px; border-radius: 8px; text-align: center;">
+                <div style="font-weight: 600;">#007BFF</div>
+                <div style="font-size: 12px; opacity: 0.8;">Accent</div>
+            </div>
+            <div style="background: #28A745; color: white; padding: 16px; border-radius: 8px; text-align: center;">
+                <div style="font-weight: 600;">#28A745</div>
+                <div style="font-size: 12px; opacity: 0.8;">Success</div>
+            </div>
+            <div style="background: #DC3545; color: white; padding: 16px; border-radius: 8px; text-align: center;">
+                <div style="font-weight: 600;">#DC3545</div>
+                <div style="font-size: 12px; opacity: 0.8;">Error</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
