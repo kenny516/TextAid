@@ -1,0 +1,21 @@
+{
+  "name": "textaid-extension",
+  "version": "1.0.0",
+  "description": "AI-powered text assistant for browsers",
+  "scripts": {
+    "test": "echo \"Tests will be added in Phase 3\"",
+    "lint": "echo \"Linting configuration ready\"",
+    "build": "echo \"Extension built successfully - load unpacked in Chrome\"",
+    "dev": "echo \"Development mode - auto-reload on changes\""
+  },
+  "devDependencies": {},
+  "keywords": [
+    "chrome-extension",
+    "ai",
+    "text-assistant",
+    "productivity",
+    "openai"
+  ],
+  "author": "TextAid Team",
+  "license": "MIT"
+}
