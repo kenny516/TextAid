@@ -1,0 +1,79 @@
+# Règles Git - TextAid Extension
+
+## Fichiers et dossiers à ignorer
+
+# Logs et debugs
+*.log
+debug.log
+error.log
+
+# Fichiers temporaires système
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Fichiers temporaires Windows
+*.tmp
+*.temp
+$RECYCLE.BIN/
+
+# Fichiers de configuration IDE
+.vscode/settings.json
+.vscode/launch.json
+.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+
+# Dossiers de cache
+node_modules/
+.npm
+.cache/
+.parcel-cache/
+
+# Fichiers de build et distribution
+dist/
+build/
+*.zip
+*.crx
+*.pem
+
+# Fichiers de configuration locaux
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+config.local.js
+
+# Clés API et secrets (sécurité)
+api-keys.txt
+secrets.json
+*.key
+*.pem
+
+# Fichiers de sauvegarde
+*.bak
+*.backup
+*.old
+
+# Fichiers de test temporaires
+test-output/
+coverage/
+.nyc_output
+
+# Archives et compressions
+*.tar.gz
+*.rar
+*.zip
+*.7z
+
+# Fichiers spécifiques extension Chrome
+# (garder manifest.json mais ignorer les fichiers générés)
+unpacked/
+packed/

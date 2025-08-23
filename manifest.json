@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "TextAid - AI Assistant",
+  "version": "1.0.0",
+  "description": "A versatile AI-powered assistant that enhances productivity across web-based text interactions with summarizing, real-time suggestions, and contextual content generation.",
+
+  "permissions": ["activeTab", "contextMenus", "storage", "scripting"],
+
+  "host_permissions": ["<all_urls>"],
+
+  "background": {
+    "service_worker": "background.js"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_end"
+    }
+  ],
+
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "TextAid Settings"
+  },
+
+  "icons": {
+    "16": "icons/icon16.svg",
+    "48": "icons/icon48.svg"
+  },
+
+  "web_accessible_resources": [
+    {
+      "resources": ["content.css", "icons/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
