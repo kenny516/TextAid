@@ -39,6 +39,9 @@ node_modules/
 # Fichiers de build et distribution
 dist/
 build/
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
 *.zip
 *.crx
 *.pem
