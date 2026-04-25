@@ -75,8 +75,8 @@ function SupportCard({ href, label, sub, cta, icon, primary }: CardProps) {
                     className={
                         "flex h-9 w-9 items-center justify-center rounded-md border " +
                         (primary
-                            ? "border-white/20 bg-white/[0.06] text-white"
-                            : "border-white/[0.10] bg-white/[0.02] text-white/80")
+                            ? "border-red-500/30 bg-red-500/10 text-red-400"
+                            : "border-amber-500/30 bg-amber-500/10 text-amber-400")
                     }
                 >
                     {icon}
