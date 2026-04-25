@@ -1,114 +1,121 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TextAid Settings</title>
-    <link rel="stylesheet" href="popup.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TextAid</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap"
+  />
+  <link rel="stylesheet" href="popup.css" />
 </head>
-
 <body>
-    <div class="popup-container">
-        <!-- Header -->
-        <header class="popup-header">
-            <h1 class="popup-title">TextAid</h1>
-            <svg class="settings-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
-                </path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-            </svg>
-        </header>
+  <div class="ta-app">
+    <header class="ta-header">
+      <div class="ta-brand">
+        <span class="ta-logo" aria-hidden="true"></span>
+        <span class="ta-wordmark">TextAid</span>
+      </div>
+      <kbd class="ta-shortcut" id="shortcutHint" title="Keyboard shortcut to open the toolbar"></kbd>
+    </header>
 
-        <!-- AI Provider Section -->
-        <section class="section">
-            <div class="section-title">
-                🤖 AI Provider
-            </div>
-            <div class="card">
-                <div class="toggle-group">
-                    <div class="toggle-option active" data-provider="openai">
-                        OpenAI
-                    </div>
-                    <div class="toggle-option" data-provider="gemini">
-                        Gemini
-                    </div>
-                </div>
-            </div>
-        </section>
+    <section class="ta-section">
+      <div class="ta-row-label">Provider</div>
+      <div class="ta-segmented" role="tablist">
+        <button class="ta-seg" data-provider="gemini" role="tab" aria-selected="true">Gemini</button>
+        <button class="ta-seg" data-provider="openai" role="tab" aria-selected="false">OpenAI</button>
+        <span class="ta-seg-indicator" aria-hidden="true"></span>
+      </div>
+    </section>
 
-        <!-- API Configuration Section -->
-        <section class="section">
-            <div class="section-title">
-                🔑 API Configuration
-            </div>
-            <div class="card">
-                <div class="input-group">
-                    <label class="input-label" for="apiKey">API Key</label>
-                    <input type="password" id="apiKey" class="input" placeholder="Enter your API key..."
-                        autocomplete="off" />
-                </div>
-                <div class="status-indicator status-disconnected" id="connectionStatus">
-                    Disconnected
-                </div>
-            </div>
-        </section>
+    <section class="ta-section">
+      <div class="ta-row-label">API key</div>
+      <div class="ta-input-row">
+        <input
+          type="password"
+          id="apiKey"
+          class="ta-input"
+          placeholder="AIza..."
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <button class="ta-btn-ghost" id="testKey">Test</button>
+      </div>
+      <div class="ta-status" id="statusRow">
+        <span class="ta-dot ta-dot--idle" id="statusDot"></span>
+        <span class="ta-status-text" id="statusText">Idle</span>
+      </div>
+      <div class="ta-status-error" id="statusError" hidden></div>
+    </section>
 
-        <!-- Features Section -->
-        <section class="section">
-            <div class="section-title">
-                ⚡ Features
-            </div>
-            <div class="card">
-                <div class="feature-toggle">
-                    <div class="feature-info">
-                        <div class="feature-name">Text Summarization</div>
-                        <div class="feature-desc text-gray-500">Summarize selected text</div>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" id="enableSummary" checked>
-                        <span class="switch-slider"></span>
-                    </label>
-                </div>
+    <section class="ta-section">
+      <div class="ta-row-label">Model</div>
+      <div class="ta-custom-select" id="modelSelect" data-id="model"></div>
+    </section>
 
-                <div class="feature-toggle">
-                    <div class="feature-info">
-                        <div class="feature-name">Context Menu</div>
-                        <div class="feature-desc text-gray-500">Right-click options</div>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" id="enableContextMenu" checked>
-                        <span class="switch-slider"></span>
-                    </label>
-                </div>
+    <section class="ta-section">
+      <div class="ta-row-label">Tone</div>
+      <div class="ta-custom-select" id="toneSelect" data-id="tone"></div>
+    </section>
 
-                <div class="feature-toggle">
-                    <div class="feature-info">
-                        <div class="feature-name">Floating Toolbar</div>
-                        <div class="feature-desc text-gray-500">Quick access buttons</div>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" id="enableFloatingToolbar" checked>
-                        <span class="switch-slider"></span>
-                    </label>
-                </div>
-            </div>
-        </section>
-
-        <!-- Actions -->
-        <div class="actions">
-            <button class="btn btn-primary" id="saveSettings">
-                Save Settings
-            </button>
+    <section class="ta-section ta-section--toggles">
+      <div class="ta-toggle-row">
+        <div class="ta-toggle-meta">
+          <div class="ta-toggle-name">Floating toolbar</div>
+          <div class="ta-toggle-desc">Appears on text selection.</div>
         </div>
+        <label class="ta-switch">
+          <input type="checkbox" id="enableFloatingToolbar" />
+          <span class="ta-switch-track"></span>
+        </label>
+      </div>
+      <div class="ta-toggle-row">
+        <div class="ta-toggle-meta">
+          <div class="ta-toggle-name">Context menu</div>
+          <div class="ta-toggle-desc">Right-click actions.</div>
+        </div>
+        <label class="ta-switch">
+          <input type="checkbox" id="enableContextMenu" />
+          <span class="ta-switch-track"></span>
+        </label>
+      </div>
+      <div class="ta-toggle-row">
+        <div class="ta-toggle-meta">
+          <div class="ta-toggle-name">Inline suggestions</div>
+          <div class="ta-toggle-desc">Ghost completions while typing.</div>
+        </div>
+        <label class="ta-switch">
+          <input type="checkbox" id="enableSuggestions" />
+          <span class="ta-switch-track"></span>
+        </label>
+      </div>
+    </section>
 
-        <!-- Status Message -->
-        <div id="statusMessage" class="status-message" style="display: none;"></div>
+    <section class="ta-section">
+      <div class="ta-row-label">Recent</div>
+      <ul class="ta-history" id="historyList">
+        <li class="ta-history-empty" id="historyEmpty">
+          Nothing yet — select text on any page to get started.
+        </li>
+      </ul>
+    </section>
+
+    <div class="ta-actions">
+      <button class="ta-btn-primary" id="saveSettings">
+        <span class="ta-btn-label">Save</span>
+      </button>
     </div>
 
-    <script src="popup.js"></script>
+    <footer class="ta-footer">
+      <span class="ta-foot-caption">v1.1.0 · Open source</span>
+      <a class="ta-foot-link" id="ghLink" href="https://github.com/kenny516/TextAid" target="_blank" rel="noopener">
+        GitHub<span class="ta-foot-link-icon" id="iconExternal" aria-hidden="true"></span>
+      </a>
+    </footer>
+  </div>
+  <script src="popup.js"></script>
 </body>
-
 </html>
