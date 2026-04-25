@@ -5,6 +5,46 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [1.2.0] - 2026-04-25
+
+### Added
+- Donation channels: GitHub Sponsors, Buy Me a Coffee, Ko-fi, surfaced via
+  a new **Support** section on the landing and a `.github/FUNDING.yml`
+  sponsor button on the repo.
+- Live **GitHub stars** badge in the landing navbar (cached 1h in
+  `localStorage`, falls back gracefully if the API rate-limits).
+- Comprehensive `/docs` page on the landing: install per browser, API key
+  setup, shortcuts, FAQ, troubleshooting — with sticky sidebar nav and
+  scroll-spy.
+- Download section with one card per browser family (Chromium, Gecko,
+  Safari, Source) and explicit per-browser steps.
+- `npm run version:set` script that bumps `package.json`, `manifest.json`
+  and `landing/package.json` in lockstep.
+- `RELEASING.md` documenting the full release flow.
+- `.github/workflows/release.yml` — pushing a `vX.Y.Z` tag now builds both
+  browser zips, extracts the matching CHANGELOG section, and publishes a
+  GitHub Release with version-pinned and version-less artifact aliases.
+
+### Changed
+- Adopted a unified PNG icon (`icons/icon-textaid.png`) across the
+  extension manifest, popup, landing favicon, navbar and footer logos.
+- Landing mockup now mirrors the real extension (rounded toolbar, modal
+  result card with status header).
+- Synced versioning: every manifest now reports `1.2.0`.
+
+### Fixed
+- Toolbar **More** dropdown disappearing on click — `mouseup` selection
+  handler now ignores events that originate inside `.textaid-root`.
+- Native `<select>` widgets in the popup looked broken on Windows. They
+  were replaced by a styled `CustomSelect` component for model and tone.
+- API key **Test** errors are now shown inline in a red-tinted card
+  beneath the status row, instead of being hidden in a tooltip.
+- Invisible primary button labels on the Download cards (the global
+  `a { color: inherit }` rule was overriding Tailwind utilities — fixed
+  with `!text-*` prefixes).
+
 ## [1.1.0] - 2025
 
 ### Changed

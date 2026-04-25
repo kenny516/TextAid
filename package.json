@@ -1,6 +1,6 @@
 {
   "name": "textaid-extension",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Cross-browser AI writing assistant (Chrome, Firefox, Brave, Edge, Opera, Arc, Vivaldi, Zen, Safari)",
   "type": "module",
   "scripts": {
@@ -10,6 +10,7 @@
     "dev": "node scripts/watch.mjs",
     "dev:chrome": "node scripts/watch.mjs chrome",
     "dev:firefox": "node scripts/watch.mjs firefox",
+    "version:set": "node scripts/version.mjs",
     "test": "echo \"Tests will be added in Phase 3\"",
     "lint": "echo \"Linting configuration ready\""
   },
