@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "../ui/button";
+import { GitHubStars } from "../github-stars";
 
 export function Navbar() {
     const location = useLocation();
@@ -11,6 +12,7 @@ export function Navbar() {
             ["Demo", "#demo"],
             ["Providers", "#providers"],
             ["Install", "#install"],
+            ["Support", "#support"],
         ]
         : [
             ["Home", "/"],
@@ -60,15 +62,8 @@ export function Navbar() {
                     </Link>
                 </nav>
 
-                <div className="flex items-center gap-4">
-                    <a
-                        href="https://github.com/kenny516/TextAid"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="hidden text-[0.85rem] text-white/60 transition-colors hover:text-white sm:inline"
-                    >
-                        GitHub
-                    </a>
+                <div className="flex items-center gap-3">
+                    <GitHubStars className="hidden sm:inline-flex" />
                     <Button size="sm" variant="primary" asChild>
                         <a href={onHome ? "#install" : "/#install"}>Install</a>
                     </Button>
