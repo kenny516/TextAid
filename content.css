@@ -1,411 +1,423 @@
-/* TextAid Extension Content Styles - Vercel-inspired Design */
+/* TextAid injected styles — dark monochrome.
+   Uses double-class specificity (.textaid-root.textaid-root) and
+   `all: revert` resets to survive arbitrary host CSS without `!important`.
+   No remote font @import (CSP-safe on every site). */
 
-/* Import Inter font */
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
-
-/* CSS Custom Properties (matching popup design) */
-:root {
-  /* Colors */
-  --textaid-color-primary: #2e2e2e;
-  --textaid-color-background: #f8f8f8;
-  --textaid-color-accent: #007bff;
-  --textaid-color-success: #28a745;
-  --textaid-color-error: #dc3545;
-  --textaid-color-white: #ffffff;
-
-  /* Extended palette */
-  --textaid-color-gray-50: #fafafa;
-  --textaid-color-gray-100: #f5f5f5;
-  --textaid-color-gray-200: #e5e5e5;
-  --textaid-color-gray-300: #d4d4d4;
-  --textaid-color-gray-400: #a3a3a3;
-  --textaid-color-gray-500: #737373;
-  --textaid-color-gray-600: #525252;
-  --textaid-color-gray-700: #404040;
-  --textaid-color-gray-800: #262626;
-  --textaid-color-gray-900: #171717;
-
-  /* Typography */
-  --textaid-font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, sans-serif;
-  --textaid-font-size-xs: 12px;
-  --textaid-font-size-sm: 14px;
-  --textaid-font-size-base: 16px;
-  --textaid-font-size-lg: 18px;
-  --textaid-font-size-xl: 20px;
-  --textaid-font-size-2xl: 24px;
-
-  /* Spacing */
-  --textaid-space-1: 4px;
-  --textaid-space-2: 8px;
-  --textaid-space-3: 12px;
-  --textaid-space-4: 16px;
-  --textaid-space-5: 20px;
-  --textaid-space-6: 24px;
-  --textaid-space-8: 32px;
-
-  /* Border radius */
-  --textaid-radius-sm: 4px;
-  --textaid-radius-md: 6px;
-  --textaid-radius-lg: 8px;
-  --textaid-radius-xl: 12px;
-
-  /* Shadows */
-  --textaid-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --textaid-shadow-md: 0 1px 3px 0 rgba(0, 0, 0, 0.1),
-    0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  --textaid-shadow-lg: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --textaid-shadow-xl: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --textaid-shadow-2xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
-    0 10px 10px -5px rgba(0, 0, 0, 0.04);
-
-  /* Transitions */
-  --textaid-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-  --textaid-transition-normal: 200ms cubic-bezier(0.4, 0, 0.2, 1);
-  --textaid-transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+.textaid-root.textaid-root {
+  all: revert;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI",
+    system-ui, sans-serif;
+  --ta-bg: #0a0a0a;
+  --ta-fg: #fafafa;
+  --ta-soft: rgba(250, 250, 250, 0.65);
+  --ta-muted: rgba(250, 250, 250, 0.45);
+  --ta-border: rgba(255, 255, 255, 0.10);
+  --ta-border-strong: rgba(255, 255, 255, 0.18);
+  --ta-card: rgba(255, 255, 255, 0.04);
+  --ta-card-strong: rgba(255, 255, 255, 0.08);
+  --ta-card-hot: rgba(255, 255, 255, 0.14);
+  --ta-accent: #fafafa;
+  --ta-accent-fg: #0a0a0a;
+  --ta-radius: 8px;
+  --ta-radius-sm: 6px;
+  --ta-radius-lg: 12px;
+  --ta-t: 120ms ease;
+  color: var(--ta-fg);
+  font-size: 13px;
+  line-height: 1.5;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  text-align: left;
+}
+.textaid-root.textaid-root *,
+.textaid-root.textaid-root *::before,
+.textaid-root.textaid-root *::after {
+  box-sizing: border-box;
+  font-family: inherit;
+  color: inherit;
 }
 
-/* =================================================================
-   FLOATING TOOLBAR - Glassmorphism & Modern Design
-   ================================================================= */
-
-.textaid-floating-toolbar {
-  position: absolute !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: var(--textaid-space-3) !important;
-  padding: var(--textaid-space-3) !important;
-  background: rgba(255, 255, 255, 0.98) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  border: 1.5px solid var(--textaid-color-gray-200) !important;
-  border-radius: var(--textaid-radius-xl) !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.1) !important;
-  font-family: var(--textaid-font-family) !important;
-  z-index: 2147483647 !important;
-  pointer-events: auto !important;
-  box-sizing: border-box !important;
-  transition: all var(--textaid-transition-normal) !important;
+/* =====================================================
+   Floating toolbar
+   ===================================================== */
+.textaid-toolbar.textaid-root {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2147483647;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  background: #0a0a0a;
+  border: 1px solid var(--ta-border);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity var(--ta-t), transform var(--ta-t);
+  pointer-events: auto;
+  user-select: none;
+}
+.textaid-toolbar.textaid-root.is-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
-.textaid-floating-toolbar:hover {
-  background: rgba(255, 255, 255, 0.98) !important;
-  box-shadow: var(--textaid-shadow-2xl) !important;
-  transform: translateY(-1px) !important;
+.textaid-toolbar.textaid-root .ta-tb-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 28px;
+  min-width: 28px;
+  padding: 0 8px;
+  background: transparent;
+  border: 0;
+  border-radius: var(--ta-radius-sm);
+  color: var(--ta-fg);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background var(--ta-t);
+}
+.textaid-toolbar.textaid-root .ta-tb-btn--icon {
+  padding: 0;
+  width: 28px;
+}
+.textaid-toolbar.textaid-root .ta-tb-btn:hover {
+  background: var(--ta-card-strong);
+}
+.textaid-toolbar.textaid-root .ta-tb-btn:active {
+  background: var(--ta-card-hot);
+}
+.textaid-toolbar.textaid-root .ta-tb-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.textaid-toolbar.textaid-root .ta-tb-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 1.5;
+}
+.textaid-toolbar.textaid-root .ta-tb-divider {
+  width: 1px;
+  height: 16px;
+  margin: 0 2px;
+  background: var(--ta-border);
+}
+.textaid-toolbar.textaid-root .ta-tb-tooltip {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #0a0a0a;
+  border: 1px solid var(--ta-border);
+  color: var(--ta-soft);
+  font-size: 11px;
+  padding: 3px 6px;
+  border-radius: var(--ta-radius-sm);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--ta-t);
+}
+.textaid-toolbar.textaid-root .ta-tb-btn:hover .ta-tb-tooltip {
+  opacity: 1;
 }
 
-/* Floating Toolbar Buttons */
-.textaid-btn {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  min-width: 44px !important;
-  height: auto !important;
-  padding: 6px 12px !important;
-  gap: 8px !important;
-  background: rgba(0, 0, 0, 0.04) !important;
-  border: none !important;
-  border-radius: var(--textaid-radius-md) !important;
-  font-size: 14px !important;
-  cursor: pointer !important;
-  transition: all var(--textaid-transition-fast) !important;
-  color: var(--textaid-color-primary) !important;
-  position: relative !important;
-  overflow: visible !important;
-  box-sizing: border-box !important;
-  white-space: nowrap !important;
+/* Dropdown */
+.textaid-dropdown.textaid-root {
+  position: absolute;
+  z-index: 2147483647;
+  min-width: 200px;
+  background: #0a0a0a;
+  border: 1px solid var(--ta-border);
+  border-radius: var(--ta-radius);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+}
+.textaid-dropdown.textaid-root .ta-dd-item {
+  display: flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: var(--ta-radius-sm);
+  font-size: 12px;
+  color: var(--ta-fg);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--ta-t);
+}
+.textaid-dropdown.textaid-root .ta-dd-item:hover {
+  background: var(--ta-card-strong);
 }
 
-.textaid-btn svg,
-.textaid-btn img {
-  width: 18px !important;
-  height: 18px !important;
+/* =====================================================
+   Modal
+   ===================================================== */
+.textaid-modal.textaid-root {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  opacity: 0;
+  transition: opacity var(--ta-t);
+}
+.textaid-modal.textaid-root.is-visible {
+  opacity: 1;
 }
 
-.textaid-btn:hover {
-  background: var(--textaid-color-accent) !important;
-  color: var(--textaid-color-white) !important;
-  transform: translateY(-1px) !important;
+.textaid-modal.textaid-root .ta-modal-card {
+  width: min(560px, 100% - 32px);
+  max-height: 80vh;
+  background: #0a0a0a;
+  border: 1px solid var(--ta-border);
+  border-radius: var(--ta-radius-lg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: translateY(6px);
+  transition: transform var(--ta-t);
+}
+.textaid-modal.textaid-root.is-visible .ta-modal-card {
+  transform: translateY(0);
 }
 
-.textaid-btn:active {
-  transform: scale(0.95) !important;
+.textaid-modal.textaid-root .ta-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 44px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--ta-border);
+  flex-shrink: 0;
+}
+.textaid-modal.textaid-root .ta-modal-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: ui-monospace, "SF Mono", Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ta-soft);
+}
+.textaid-modal.textaid-root .ta-streaming {
+  font-size: 10px;
+  color: var(--ta-muted);
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: inherit;
+}
+.textaid-modal.textaid-root .ta-modal-close {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  border-radius: var(--ta-radius-sm);
+  color: var(--ta-soft);
+  cursor: pointer;
+  transition: background var(--ta-t), color var(--ta-t);
+}
+.textaid-modal.textaid-root .ta-modal-close:hover {
+  background: var(--ta-card-strong);
+  color: var(--ta-fg);
+}
+.textaid-modal.textaid-root .ta-modal-close svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 1.5;
 }
 
-/* =================================================================
-   MODAL SYSTEM - Clean & Modern
-   ================================================================= */
-
-.textaid-modal {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  background: rgba(0, 0, 0, 0.6) !important;
-  backdrop-filter: blur(8px) !important;
-  -webkit-backdrop-filter: blur(8px) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  z-index: 2147483647 !important;
-  padding: var(--textaid-space-6) !important;
-  box-sizing: border-box !important;
-  animation: textaidModalFadeIn var(--textaid-transition-normal) ease-out !important;
+.textaid-modal.textaid-root .ta-modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ta-fg);
+  white-space: pre-wrap;
+  flex: 1 1 auto;
+}
+.textaid-modal.textaid-root .ta-modal-body--center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
 }
 
-.textaid-modal-content {
-  background: var(--textaid-color-white) !important;
-  border-radius: var(--textaid-radius-xl) !important;
-  box-shadow: var(--textaid-shadow-2xl) !important;
-  max-width: 500px !important;
-  max-height: 80vh !important;
-  width: 100% !important;
-  overflow: hidden !important;
-  position: relative !important;
-  animation: textaidModalSlideIn var(--textaid-transition-normal) ease-out !important;
-  font-family: var(--textaid-font-family) !important;
-  box-sizing: border-box !important;
+.textaid-modal.textaid-root .ta-loading-dots {
+  display: inline-flex;
+  gap: 6px;
+}
+.textaid-modal.textaid-root .ta-loading-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ta-soft);
+  animation: ta-bounce 1s ease-in-out infinite;
+}
+.textaid-modal.textaid-root .ta-loading-dots span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.textaid-modal.textaid-root .ta-loading-dots span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+@keyframes ta-bounce {
+  0%, 80%, 100% { opacity: 0.3; transform: translateY(0); }
+  40% { opacity: 1; transform: translateY(-3px); }
 }
 
-/* Close Button */
-.textaid-close {
-  position: absolute !important;
-  top: var(--textaid-space-4) !important;
-  right: var(--textaid-space-4) !important;
-  width: 32px !important;
-  height: 32px !important;
-  border: none !important;
-  background: var(--textaid-color-gray-100) !important;
-  border-radius: 50% !important;
-  cursor: pointer !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  font-size: var(--textaid-font-size-lg) !important;
-  color: var(--textaid-color-gray-500) !important;
-  transition: all var(--textaid-transition-fast) !important;
-  z-index: 10 !important;
+.textaid-modal.textaid-root .ta-modal-error {
+  color: var(--ta-fg);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.textaid-modal.textaid-root .ta-modal-error-title {
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.textaid-modal.textaid-root .ta-modal-error-title svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 1.5;
+}
+.textaid-modal.textaid-root .ta-modal-error-msg {
+  color: var(--ta-soft);
+  font-size: 13px;
 }
 
-.textaid-close:hover {
-  background: var(--textaid-color-error) !important;
-  color: var(--textaid-color-white) !important;
-  transform: scale(1.1) !important;
+.textaid-modal.textaid-root .ta-modal-foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  height: 52px;
+  padding: 0 16px;
+  border-top: 1px solid var(--ta-border);
+  flex-shrink: 0;
+}
+.textaid-modal.textaid-root .ta-foot-btn {
+  height: 30px;
+  padding: 0 12px;
+  background: transparent;
+  border: 1px solid var(--ta-border);
+  color: var(--ta-fg);
+  border-radius: var(--ta-radius-sm);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background var(--ta-t), border-color var(--ta-t);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.textaid-root .ta-foot-btn:hover {
+  background: var(--ta-card-strong);
+  border-color: var(--ta-border-strong);
+}
+.textaid-modal.textaid-root .ta-foot-btn--primary {
+  background: var(--ta-accent);
+  color: var(--ta-accent-fg);
+  border-color: var(--ta-accent);
+}
+.textaid-modal.textaid-root .ta-foot-btn--primary:hover {
+  opacity: 0.9;
+  background: var(--ta-accent);
+  border-color: var(--ta-accent);
+}
+.textaid-modal.textaid-root .ta-foot-btn svg {
+  width: 12px;
+  height: 12px;
+  stroke-width: 1.5;
 }
 
-/* =================================================================
-   CONTENT SECTIONS - Typography & Layout
-   ================================================================= */
-
-/* Processing State */
-.textaid-processing {
-  text-align: center !important;
-  padding: var(--textaid-space-8) var(--textaid-space-6) !important;
+/* Custom prompt input modal */
+.textaid-modal.textaid-root .ta-prompt-input {
+  width: 100%;
+  min-height: 100px;
+  background: var(--ta-card);
+  border: 1px solid var(--ta-border);
+  border-radius: var(--ta-radius);
+  color: var(--ta-fg);
+  font: inherit;
+  font-size: 13px;
+  padding: 10px 12px;
+  outline: none;
+  resize: vertical;
+  transition: border-color var(--ta-t), box-shadow var(--ta-t);
+}
+.textaid-modal.textaid-root .ta-prompt-input:focus {
+  border-color: var(--ta-border-strong);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
 }
 
-.textaid-spinner {
-  width: 40px !important;
-  height: 40px !important;
-  border: 3px solid var(--textaid-color-gray-200) !important;
-  border-top: 3px solid var(--textaid-color-accent) !important;
-  border-radius: 50% !important;
-  animation: textaidSpin 1s linear infinite !important;
-  margin: 0 auto var(--textaid-space-4) !important;
+/* Inline ghost suggestion (gated, default off) */
+.textaid-suggestion.textaid-root {
+  position: absolute;
+  z-index: 2147483647;
+  background: #0a0a0a;
+  border: 1px solid var(--ta-border);
+  border-radius: var(--ta-radius-sm);
+  padding: 6px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--ta-soft);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  max-width: 360px;
+}
+.textaid-suggestion.textaid-root .ta-sug-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.textaid-suggestion.textaid-root .ta-sug-key {
+  font-family: ui-monospace, "SF Mono", Consolas, monospace;
+  font-size: 10px;
+  background: var(--ta-card);
+  border: 1px solid var(--ta-border);
+  padding: 1px 5px;
+  border-radius: 4px;
+  color: var(--ta-muted);
 }
 
-.textaid-processing h3 {
-  font-size: var(--textaid-font-size-lg) !important;
-  font-weight: 600 !important;
-  color: var(--textaid-color-primary) !important;
-  margin: 0 0 var(--textaid-space-2) 0 !important;
+/* Toast */
+.textaid-toast.textaid-root {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  z-index: 2147483647;
+  background: #0a0a0a;
+  border: 1px solid var(--ta-border);
+  border-radius: var(--ta-radius);
+  padding: 8px 14px;
+  font-size: 12px;
+  color: var(--ta-fg);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transition: opacity var(--ta-t), transform var(--ta-t);
 }
-
-.textaid-processing p {
-  font-size: var(--textaid-font-size-sm) !important;
-  color: var(--textaid-color-gray-500) !important;
-  margin: 0 !important;
-}
-
-/* Result Display */
-.textaid-result {
-  padding: var(--textaid-space-6) !important;
-}
-
-.textaid-result h3 {
-  font-size: var(--textaid-font-size-xl) !important;
-  font-weight: 600 !important;
-  color: var(--textaid-color-primary) !important;
-  margin: 0 0 var(--textaid-space-4) 0 !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: var(--textaid-space-2) !important;
-}
-
-.textaid-result h3::before {
-  content: "✨" !important;
-  font-size: var(--textaid-font-size-lg) !important;
-}
-
-.textaid-result-text {
-  background: var(--textaid-color-gray-50) !important;
-  border: 1px solid var(--textaid-color-gray-200) !important;
-  border-radius: var(--textaid-radius-lg) !important;
-  padding: var(--textaid-space-4) !important;
-  font-size: var(--textaid-font-size-sm) !important;
-  line-height: 1.6 !important;
-  color: var(--textaid-color-primary) !important;
-  white-space: pre-wrap !important;
-  max-height: 300px !important;
-  overflow-y: auto !important;
-  margin-bottom: var(--textaid-space-4) !important;
-}
-
-/* Action Buttons */
-.textaid-result-actions {
-  display: flex !important;
-  justify-content: flex-end !important;
-  gap: var(--textaid-space-3) !important;
-  padding-top: var(--textaid-space-4) !important;
-  border-top: 1px solid var(--textaid-color-gray-200) !important;
-}
-
-.textaid-copy {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: var(--textaid-space-2) !important;
-  padding: var(--textaid-space-3) var(--textaid-space-4) !important;
-  background: var(--textaid-color-accent) !important;
-  color: var(--textaid-color-white) !important;
-  border: none !important;
-  border-radius: var(--textaid-radius-md) !important;
-  font-size: var(--textaid-font-size-sm) !important;
-  font-weight: 500 !important;
-  cursor: pointer !important;
-  transition: all var(--textaid-transition-fast) !important;
-  font-family: var(--textaid-font-family) !important;
-}
-
-.textaid-copy:hover {
-  background: #0066cc !important;
-  transform: translateY(-1px) !important;
-  box-shadow: var(--textaid-shadow-lg) !important;
-}
-
-.textaid-copy:active {
-  transform: translateY(0) !important;
-}
-
-.textaid-copy::before {
-  content: "📋" !important;
-}
-
-/* Error State */
-.textaid-error {
-  text-align: center !important;
-  padding: var(--textaid-space-8) var(--textaid-space-6) !important;
-}
-
-.textaid-error h3 {
-  font-size: var(--textaid-font-size-xl) !important;
-  font-weight: 600 !important;
-  color: var(--textaid-color-error) !important;
-  margin: 0 0 var(--textaid-space-4) 0 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: var(--textaid-space-2) !important;
-}
-
-.textaid-error h3::before {
-  content: "⚠️" !important;
-}
-
-.textaid-error p {
-  font-size: var(--textaid-font-size-sm) !important;
-  color: var(--textaid-color-gray-600) !important;
-  line-height: 1.5 !important;
-  margin: 0 !important;
-}
-
-/* =================================================================
-   ANIMATIONS
-   ================================================================= */
-
-@keyframes textaidModalFadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes textaidModalSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes textaidSpin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* =================================================================
-   RESET & OVERRIDES
-   ================================================================= */
-
-/* Prevent conflicts with page styles */
-.textaid-floating-toolbar,
-.textaid-modal,
-.textaid-modal-content {
-  all: unset !important;
-}
-
-.textaid-floating-toolbar *,
-.textaid-modal *,
-.textaid-modal-content * {
-  box-sizing: border-box !important;
-}
-
-/* Ensure proper stacking */
-.textaid-floating-toolbar,
-.textaid-modal {
-  z-index: 2147483647 !important;
-}
-
-/* =================================================================
-   RESPONSIVE DESIGN
-   ================================================================= */
-
-@media (max-width: 600px) {
-  .textaid-modal {
-    padding: var(--textaid-space-4) !important;
-  }
-
-  .textaid-modal-content {
-    max-height: 90vh !important;
-  }
-
-  .textaid-floating-toolbar {
-    gap: var(--textaid-space-1) !important;
-  }
-
-  .textaid-btn {
-    width: 28px !important;
-    height: 28px !important;
-    font-size: var(--textaid-font-size-sm) !important;
-  }
+.textaid-toast.textaid-root.is-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }

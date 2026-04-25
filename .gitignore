@@ -80,3 +80,9 @@ coverage/
 # (garder manifest.json mais ignorer les fichiers générés)
 unpacked/
 packed/
+
+
+#Ignore vscode AI rules
+.github\instructions\codacy.instructions.md
+
+dist/

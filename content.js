@@ -1,557 +1,599 @@
-// Content script for TextAid extension
-class TextAidContent {
-    constructor() {
-        this.isEnabled = true;
-        this.settings = {};
-        this.suggestionTimeout = null;
-        this.lastSuggestionLength = 0;
-        this.floatingToolbar = null;
-        this.resultModal = null;
-        this.currentSelectedText = ''; // Store current selection
+// TextAid content script
+const TA_ICONS = {
+  "align-justify":
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>',
+  "pen-line":
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
+  lightbulb:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>',
+  expand:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21H3"/><path d="M21 3H3"/><path d="M9 8l-3 4 3 4"/><path d="M15 8l3 4-3 4"/></svg>',
+  replace:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4c0-1.1.9-2 2-2"/><path d="M20 2c1.1 0 2 .9 2 2"/><path d="M22 8c0 1.1-.9 2-2 2"/><path d="M16 10c-1.1 0-2-.9-2-2"/><path d="m3 7 3 3 3-3"/><path d="M6 10V5a3 3 0 0 1 3-3h1"/><rect width="8" height="8" x="2" y="14" rx="2"/></svg>',
+  "more-horizontal":
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>',
+  x:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+  copy:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>',
+  check:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+  "alert-circle":
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>',
+  "arrow-down":
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>',
+};
 
-        this.init();
+const TA_ACTION_LABELS = {
+  summarize: "SUMMARIZE",
+  rephrase: "REWRITE",
+  ideas: "IDEAS",
+  expand: "EXPAND",
+  custom: "CUSTOM",
+  translate: "TRANSLATE",
+  grammar: "GRAMMAR",
+  formal: "FORMAL",
+  casual: "CASUAL",
+};
+
+function tIcon(name) {
+  return TA_ICONS[name] || "";
+}
+
+class TextAid {
+  constructor() {
+    this.settings = {};
+    this.toolbar = null;
+    this.modal = null;
+    this.dropdown = null;
+    this.toast = null;
+    this.toastTimer = null;
+    this.selectionText = "";
+    this.selectionRect = null;
+    this.selectionEditable = false;
+    this.selectionRange = null;
+    this.selectionTimer = null;
+    this.modalState = null;
+    this.init();
+  }
+
+  init() {
+    chrome.storage.sync.get(
+      [
+        "enableFloatingToolbar",
+        "enableContextMenu",
+        "enableSuggestions",
+        "suggestionStyle",
+      ],
+      (r) => {
+        this.settings = {
+          enableFloatingToolbar: r.enableFloatingToolbar !== false,
+          enableContextMenu: r.enableContextMenu !== false,
+          enableSuggestions: r.enableSuggestions === true,
+          suggestionStyle: r.suggestionStyle || "professional",
+        };
+      }
+    );
+
+    chrome.storage.onChanged.addListener((changes, area) => {
+      if (area !== "sync") return;
+      Object.entries(changes).forEach(([k, v]) => {
+        if (k in this.settings || ["enableFloatingToolbar", "enableContextMenu", "enableSuggestions", "suggestionStyle"].includes(k)) {
+          this.settings[k] = v.newValue;
+        }
+      });
+    });
+
+    document.addEventListener("mouseup", (e) => {
+      if (e.target && e.target.closest && e.target.closest(".textaid-root")) return;
+      this.scheduleSelection();
+    }, true);
+    document.addEventListener("keyup", () => this.scheduleSelection(), true);
+    document.addEventListener(
+      "mousedown",
+      (e) => {
+        if (this.toolbar && !e.target.closest(".textaid-root")) {
+          this.hideToolbar();
+        }
+        if (this.dropdown && !e.target.closest(".textaid-root")) {
+          this.hideDropdown();
+        }
+      },
+      true
+    );
+    document.addEventListener("scroll", () => this.hideToolbar(), true);
+
+    chrome.runtime.onMessage.addListener((msg) => this.onMessage(msg));
+  }
+
+  scheduleSelection() {
+    clearTimeout(this.selectionTimer);
+    this.selectionTimer = setTimeout(() => this.handleSelection(), 80);
+  }
+
+  handleSelection() {
+    if (!this.settings.enableFloatingToolbar) {
+      this.hideToolbar();
+      return;
+    }
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) {
+      this.hideToolbar();
+      return;
+    }
+    const text = sel.toString().trim();
+    if (text.length < 4) {
+      this.hideToolbar();
+      return;
+    }
+    const anchorNode = sel.anchorNode;
+    if (anchorNode && anchorNode.parentElement && anchorNode.parentElement.closest(".textaid-root")) {
+      return;
+    }
+    const range = sel.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+    if (!rect || (rect.width === 0 && rect.height === 0)) {
+      this.hideToolbar();
+      return;
+    }
+    this.selectionText = text;
+    this.selectionRect = rect;
+    this.selectionRange = range.cloneRange();
+    this.selectionEditable = this.isEditableContext(anchorNode);
+    this.showToolbar();
+  }
+
+  isEditableContext(node) {
+    if (!node) return false;
+    const el = node.nodeType === 1 ? node : node.parentElement;
+    if (!el) return false;
+    if (el.isContentEditable) return true;
+    const active = document.activeElement;
+    if (active && (active.tagName === "TEXTAREA" || (active.tagName === "INPUT" && /^(text|email|search|url|tel)$/i.test(active.type || "text")))) {
+      return true;
+    }
+    return false;
+  }
+
+  showToolbar() {
+    this.hideToolbar();
+    const tb = document.createElement("div");
+    tb.className = "textaid-toolbar textaid-root";
+
+    const buttons = [
+      { action: "summarize", icon: "align-justify", label: "Summarize", showLabel: true },
+      { action: "rephrase", icon: "pen-line", label: "Rewrite" },
+      { action: "ideas", icon: "lightbulb", label: "Ideas" },
+      { action: "expand", icon: "expand", label: "Expand" },
+    ];
+    buttons.forEach((b) => tb.appendChild(this.makeToolbarBtn(b)));
+
+    if (this.selectionEditable) {
+      tb.appendChild(
+        this.makeToolbarBtn({
+          action: "replace-prompt",
+          icon: "replace",
+          label: "Replace selection",
+        })
+      );
     }
 
-    init() {
-        // Load settings
-        this.loadSettings();
+    const div = document.createElement("span");
+    div.className = "ta-tb-divider";
+    tb.appendChild(div);
 
-        // Set up event listeners
-        this.setupEventListeners();
+    const more = this.makeToolbarBtn({ action: "__more", icon: "more-horizontal", label: "More" });
+    tb.appendChild(more);
 
-        // Listen for messages from background script
-        chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-            this.handleMessage(message, sender, sendResponse);
-        });
+    document.body.appendChild(tb);
+    this.toolbar = tb;
+    this.positionToolbar();
+    requestAnimationFrame(() => tb.classList.add("is-visible"));
+  }
 
-        console.log('TextAid content script initialized on:', window.location.hostname);
+  makeToolbarBtn({ action, icon, label, showLabel }) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "ta-tb-btn" + (showLabel ? "" : " ta-tb-btn--icon");
+    btn.dataset.action = action;
+    btn.innerHTML = tIcon(icon) + (showLabel ? `<span>${label}</span>` : "");
+    if (!showLabel) {
+      const tip = document.createElement("span");
+      tip.className = "ta-tb-tooltip";
+      tip.textContent = label;
+      btn.appendChild(tip);
     }
+    btn.addEventListener("mousedown", (e) => e.preventDefault());
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (action === "__more") {
+        this.openMoreDropdown(btn);
+      } else if (action === "replace-prompt") {
+        this.openCustomPrompt(true);
+      } else {
+        this.runAction(action);
+      }
+    });
+    return btn;
+  }
 
-    loadSettings() {
-        chrome.storage.sync.get([
-            'enableSummary',
-            'enableSuggestions',
-            'enableContextMenu',
-            'suggestionStyle',
-            'aggressiveness'
-        ], (result) => {
-            this.settings = result;
-            this.setupTypingListeners(); // Re-setup when settings change
-        });
+  positionToolbar() {
+    if (!this.toolbar || !this.selectionRect) return;
+    const rect = this.selectionRect;
+    const tbRect = this.toolbar.getBoundingClientRect();
+    const margin = 8;
+    let top = window.scrollY + rect.top - tbRect.height - 8;
+    if (rect.top - tbRect.height - 8 < 0) {
+      top = window.scrollY + rect.bottom + 8;
     }
+    let left = window.scrollX + rect.left + rect.width / 2 - tbRect.width / 2;
+    const maxLeft = window.scrollX + window.innerWidth - tbRect.width - margin;
+    const minLeft = window.scrollX + margin;
+    left = Math.max(minLeft, Math.min(left, maxLeft));
+    this.toolbar.style.top = top + "px";
+    this.toolbar.style.left = left + "px";
+  }
 
-    setupEventListeners() {
-        // Text selection for floating toolbar
-        document.addEventListener('mouseup', (e) => {
-            // Délai pour permettre à la sélection de se stabiliser
-            setTimeout(() => this.handleTextSelection(e), 50);
-        });
-        document.addEventListener('keyup', (e) => {
-            setTimeout(() => this.handleTextSelection(e), 50);
-        });
+  hideToolbar() {
+    if (!this.toolbar) return;
+    const tb = this.toolbar;
+    this.toolbar = null;
+    tb.classList.remove("is-visible");
+    setTimeout(() => tb.remove(), 140);
+    this.hideDropdown();
+  }
 
-        // Hide toolbar when clicking elsewhere
-        document.addEventListener('mousedown', (e) => {
-            if (this.floatingToolbar && !this.floatingToolbar.contains(e.target)) {
-                // Ne pas cacher immédiatement pour permettre le clic sur les boutons
-                setTimeout(() => {
-                    if (this.floatingToolbar && !this.floatingToolbar.contains(e.target)) {
-                        this.hideFloatingToolbar();
-                    }
-                }, 100);
-            }
-        });
-    }
-
-    setupTypingListeners() {
-        if (!this.settings.enableSuggestions) return;
-
-        // Find all text inputs and textareas
-        const textInputs = document.querySelectorAll('input[type="text"], input[type="email"], textarea, [contenteditable="true"]');
-
-        textInputs.forEach(input => {
-            // Avoid adding listeners multiple times
-            if (input.dataset.textaidEnabled) return;
-            input.dataset.textaidEnabled = 'true';
-
-            // Skip password fields for security
-            if (input.type === 'password') return;
-
-            input.addEventListener('input', (e) => this.handleTyping(e));
-            input.addEventListener('focus', (e) => this.handleFocus(e));
-            input.addEventListener('blur', (e) => this.handleBlur(e));
-        });
-
-        // Watch for dynamically added inputs
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                mutation.addedNodes.forEach((node) => {
-                    if (node.nodeType === 1) { // Element node
-                        const newInputs = node.querySelectorAll ?
-                            node.querySelectorAll('input[type="text"], input[type="email"], textarea, [contenteditable="true"]') :
-                            [];
-                        newInputs.forEach(input => {
-                            if (!input.dataset.textaidEnabled && input.type !== 'password') {
-                                input.dataset.textaidEnabled = 'true';
-                                input.addEventListener('input', (e) => this.handleTyping(e));
-                                input.addEventListener('focus', (e) => this.handleFocus(e));
-                                input.addEventListener('blur', (e) => this.handleBlur(e));
-                            }
-                        });
-                    }
-                });
-            });
-        });
-
-        observer.observe(document.body, { childList: true, subtree: true });
-    }
-
-    handleTextSelection(e) {
-        console.log('TextAid: handleTextSelection called');
-        const selection = window.getSelection();
-        const selectedText = selection.toString().trim();
-        console.log('TextAid: Selected text:', selectedText, 'Length:', selectedText.length);
-
-        if (selectedText.length > 10) { // Only show for meaningful selections
-            this.currentSelectedText = selectedText; // Store the selection
-            const range = selection.getRangeAt(0);
-            const rect = range.getBoundingClientRect();
-            console.log('TextAid: Showing floating toolbar at:', rect);
-            this.showFloatingToolbar(rect, selectedText);
+  openMoreDropdown(anchor) {
+    this.hideDropdown();
+    const dd = document.createElement("div");
+    dd.className = "textaid-dropdown textaid-root";
+    const items = [
+      { action: "translate", label: "Translate to English" },
+      { action: "grammar", label: "Fix grammar" },
+      { action: "formal", label: "Make formal" },
+      { action: "casual", label: "Make casual" },
+      { action: "__custom", label: "Custom prompt…" },
+    ];
+    items.forEach((it) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "ta-dd-item";
+      btn.textContent = it.label;
+      btn.addEventListener("mousedown", (e) => e.preventDefault());
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.hideDropdown();
+        if (it.action === "__custom") {
+          this.openCustomPrompt(false);
         } else {
-            console.log('TextAid: Hiding floating toolbar (text too short)');
-            this.currentSelectedText = '';
-            this.hideFloatingToolbar();
+          this.runAction(it.action);
         }
+      });
+      dd.appendChild(btn);
+    });
+    document.body.appendChild(dd);
+    this.dropdown = dd;
+    const r = anchor.getBoundingClientRect();
+    const ddRect = dd.getBoundingClientRect();
+    let left = window.scrollX + r.right - ddRect.width;
+    left = Math.max(window.scrollX + 8, left);
+    dd.style.top = window.scrollY + r.bottom + 6 + "px";
+    dd.style.left = left + "px";
+  }
+
+  hideDropdown() {
+    if (this.dropdown) {
+      this.dropdown.remove();
+      this.dropdown = null;
     }
+  }
 
-    showFloatingToolbar(rect, selectedText) {
-        console.log('TextAid: showFloatingToolbar called with rect:', rect, 'text:', selectedText);
-        this.hideFloatingToolbar(); // Remove existing toolbar
+  runAction(action) {
+    const text = this.selectionText;
+    if (!text) return;
+    const tone = this.settings.suggestionStyle || "professional";
+    const prompts = {
+      summarize: `Summarize the following text concisely in bullet points (under 200 words):\n\n${text}`,
+      rephrase: `Rewrite the following text in a ${tone} tone, preserving meaning:\n\n${text}`,
+      ideas: `Generate 3-5 related ideas based on the following text:\n\n${text}`,
+      expand: `Expand on the following text with more detail and context:\n\n${text}`,
+      translate: `Translate the following text to English. Output only the translation:\n\n${text}`,
+      grammar: `Correct grammar and spelling in the following text. Output only the corrected text:\n\n${text}`,
+      formal: `Rewrite the following text in a formal tone. Output only the rewritten text:\n\n${text}`,
+      casual: `Rewrite the following text in a casual, friendly tone. Output only the rewritten text:\n\n${text}`,
+    };
+    const prompt = prompts[action];
+    if (!prompt) return;
+    this.hideToolbar();
+    this.openResultModal(action);
+    chrome.runtime.sendMessage({ action: "processText", prompt, type: action });
+  }
 
-        this.floatingToolbar = document.createElement('div');
-        this.floatingToolbar.className = 'textaid-floating-toolbar';
-        this.floatingToolbar.innerHTML = `
-            <button class="textaid-btn" data-action="summarize">📝 Summarize</button>
-            <button class="textaid-btn" data-action="rephrase">✏️ Rephrase</button>
-            <button class="textaid-btn" data-action="ideas">💡 Ideas</button>
-            <button class="textaid-btn" data-action="expand">📈 Expand</button>
-        `;
+  openCustomPrompt(replaceMode) {
+    this.hideToolbar();
+    const overlay = document.createElement("div");
+    overlay.className = "textaid-modal textaid-root";
+    overlay.innerHTML = `
+      <div class="ta-modal-card">
+        <div class="ta-modal-head">
+          <span class="ta-modal-title">CUSTOM PROMPT</span>
+          <button type="button" class="ta-modal-close" data-close>${tIcon("x")}</button>
+        </div>
+        <div class="ta-modal-body">
+          <textarea class="ta-prompt-input" placeholder="Describe what you want done with the selected text…"></textarea>
+        </div>
+        <div class="ta-modal-foot">
+          <button type="button" class="ta-foot-btn" data-cancel>Cancel</button>
+          <button type="button" class="ta-foot-btn ta-foot-btn--primary" data-run>Run</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.classList.add("is-visible"));
+    const close = () => {
+      overlay.classList.remove("is-visible");
+      setTimeout(() => overlay.remove(), 140);
+    };
+    overlay.querySelector("[data-close]").addEventListener("click", close);
+    overlay.querySelector("[data-cancel]").addEventListener("click", close);
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) close();
+    });
+    const ta = overlay.querySelector(".ta-prompt-input");
+    setTimeout(() => ta.focus(), 50);
+    overlay.querySelector("[data-run]").addEventListener("click", () => {
+      const customPrompt = ta.value.trim();
+      if (!customPrompt) return;
+      const text = this.selectionText;
+      const fullPrompt = customPrompt + "\n\nText:\n" + text;
+      close();
+      this.openResultModal("custom");
+      chrome.runtime.sendMessage({
+        action: "processText",
+        prompt: fullPrompt,
+        type: "custom",
+        replaceMode: !!replaceMode,
+      });
+    });
+  }
 
-        // Position toolbar avec styles agressifs pour assurer l'affichage
-        this.floatingToolbar.style.cssText = `
-            position: absolute !important;
-            top: ${window.scrollY + rect.top - 56}px !important;
-            left: ${window.scrollX + rect.left}px !important;
-            z-index: 2147483647 !important;
-            display: flex !important;
-            pointer-events: auto !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-            background: rgba(255, 255, 255, 0.98) !important;
-            backdrop-filter: blur(16px) !important;
-            border: 1.5px solid #e5e5e5 !important;
-            border-radius: 12px !important;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.10) !important;
-            padding: 12px !important;
-            gap: 12px !important;
-            align-items: center !important;
-            box-sizing: border-box !important;
-        `;
+  openResultModal(action) {
+    this.hideModal();
+    const overlay = document.createElement("div");
+    overlay.className = "textaid-modal textaid-root";
+    const title = TA_ACTION_LABELS[action] || "RESULT";
+    overlay.innerHTML = `
+      <div class="ta-modal-card">
+        <div class="ta-modal-head">
+          <span class="ta-modal-title">
+            <span class="ta-action-name">${title}</span>
+            <span class="ta-streaming">streaming…</span>
+          </span>
+          <button type="button" class="ta-modal-close" data-close>${tIcon("x")}</button>
+        </div>
+        <div class="ta-modal-body ta-modal-body--center" data-body>
+          <span class="ta-loading-dots"><span></span><span></span><span></span></span>
+        </div>
+        <div class="ta-modal-foot" data-foot></div>
+      </div>`;
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.classList.add("is-visible"));
+    overlay.querySelector("[data-close]").addEventListener("click", () => this.hideModal());
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) this.hideModal();
+    });
+    this.modal = overlay;
+    this.modalState = {
+      action,
+      text: "",
+      started: false,
+      editable: this.selectionEditable,
+      range: this.selectionRange,
+    };
+  }
 
-        document.body.appendChild(this.floatingToolbar);
-        console.log('TextAid: Floating toolbar added to DOM:', this.floatingToolbar);
+  hideModal() {
+    if (!this.modal) return;
+    const m = this.modal;
+    this.modal = null;
+    this.modalState = null;
+    m.classList.remove("is-visible");
+    setTimeout(() => m.remove(), 140);
+  }
 
-        // Forcer les styles des boutons pour s'assurer qu'ils s'affichent
-        const buttons = this.floatingToolbar.querySelectorAll('.textaid-btn');
-        buttons.forEach(button => {
-            button.style.cssText = `
-                display: inline-flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                min-width: 44px !important;
-                height: auto !important;
-                padding: 6px 12px !important;
-                gap: 8px !important;
-                border: none !important;
-                border-radius: 8px !important;
-                background: rgba(0,0,0,0.04) !important;
-                color: var(--textaid-color-primary, #2E2E2E) !important;
-                font-size: 14px !important;
-                font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-                cursor: pointer !important;
-                transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1) !important;
-                box-sizing: border-box !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-                pointer-events: auto !important;
-                z-index: 2147483647 !important;
-                white-space: nowrap !important;
-            `;
-
-            // Hover effects using JS-friendly non-!important toggles
-            button.addEventListener('mouseenter', () => {
-                button.style.background = 'var(--textaid-color-accent, #007BFF)';
-                button.style.color = 'var(--textaid-color-white, #fff)';
-                button.style.transform = 'translateY(-1px)';
-            });
-
-            button.addEventListener('mouseleave', () => {
-                button.style.background = 'rgba(0,0,0,0.04)';
-                button.style.color = 'var(--textaid-color-primary, #2E2E2E)';
-                button.style.transform = 'translateY(0)';
-            });
-        });
-
-        // Add click handlers avec preventDefault pour garder la sélection
-        this.floatingToolbar.addEventListener('mousedown', (e) => {
-            e.preventDefault(); // Empêche la perte de sélection
-        });
-
-        this.floatingToolbar.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('TextAid: Floating toolbar clicked:', e.target);
-            if (e.target.classList.contains('textaid-btn')) {
-                const action = e.target.dataset.action;
-                console.log('TextAid: Processing action:', action, 'with text:', this.currentSelectedText);
-                this.processSelectedText(this.currentSelectedText, action);
-                this.hideFloatingToolbar();
-            }
-        });
+  appendStream(chunk) {
+    if (!this.modal || !this.modalState) return;
+    const body = this.modal.querySelector("[data-body]");
+    if (!this.modalState.started) {
+      this.modalState.started = true;
+      body.classList.remove("ta-modal-body--center");
+      body.textContent = "";
     }
+    this.modalState.text += chunk;
+    body.textContent = this.modalState.text;
+    body.scrollTop = body.scrollHeight;
+  }
 
-    hideFloatingToolbar() {
-        if (this.floatingToolbar) {
-            this.floatingToolbar.remove();
-            this.floatingToolbar = null;
-        }
+  finishStream() {
+    if (!this.modal || !this.modalState) return;
+    const stream = this.modal.querySelector(".ta-streaming");
+    if (stream) stream.remove();
+    if (!this.modalState.started) {
+      const body = this.modal.querySelector("[data-body]");
+      body.classList.remove("ta-modal-body--center");
+      body.textContent = this.modalState.text || "(empty response)";
     }
+    this.renderModalFooter();
+    this.saveHistory();
+  }
 
-    handleTyping(e) {
-        if (!this.settings.enableSuggestions) return;
+  renderModalFooter() {
+    const foot = this.modal.querySelector("[data-foot]");
+    foot.innerHTML = "";
+    const text = this.modalState.text || "";
 
-        const input = e.target;
-        const text = this.getInputText(input);
+    const copy = document.createElement("button");
+    copy.type = "button";
+    copy.className = "ta-foot-btn";
+    copy.innerHTML = `${tIcon("copy")}<span>Copy</span>`;
+    copy.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(text);
+        copy.innerHTML = `${tIcon("check")}<span>Copied</span>`;
+        setTimeout(() => (copy.innerHTML = `${tIcon("copy")}<span>Copy</span>`), 1200);
+      } catch (e) {
+        console.error("Clipboard failed", e);
+      }
+    });
+    foot.appendChild(copy);
 
-        if (!text || text.length < 3) return;
-
-        // Clear existing timeout
-        if (this.suggestionTimeout) {
-            clearTimeout(this.suggestionTimeout);
-        }
-
-        // Determine suggestion frequency based on aggressiveness
-        const wordCount = text.split(' ').length;
-        const threshold = {
-            'high': 3,
-            'medium': 5,
-            'low': 10
-        }[this.settings.aggressiveness] || 5;
-
-        if (wordCount % threshold !== 0) return;
-
-        // Debounce suggestions
-        this.suggestionTimeout = setTimeout(() => {
-            this.getSuggestion(input, text);
-        }, 500);
-    }
-
-    handleFocus(e) {
-        // Could add focus-specific logic here
-    }
-
-    handleBlur(e) {
-        // Hide any active suggestions
-        this.hideSuggestion(e.target);
-    }
-
-    getInputText(input) {
-        if (input.isContentEditable) {
-            return input.textContent || '';
-        }
-        return input.value || '';
-    }
-
-    async getSuggestion(input, text) {
-        // Don't suggest if text hasn't changed much
-        if (Math.abs(text.length - this.lastSuggestionLength) < 5) return;
-        this.lastSuggestionLength = text.length;
-
-        try {
-            const response = await chrome.runtime.sendMessage({
-                action: 'getSuggestion',
-                text: text,
-                context: input.placeholder || 'text'
-            });
-
-            if (response && response.suggestion) {
-                this.showSuggestion(input, response.suggestion);
-            }
-        } catch (error) {
-            console.error('Error getting suggestion:', error);
-        }
-    }
-
-    showSuggestion(input, suggestion) {
-        this.hideSuggestion(input);
-
-        const suggestionDiv = document.createElement('div');
-        suggestionDiv.className = 'textaid-suggestion';
-        suggestionDiv.innerHTML = `
-            <div class="textaid-suggestion-text">${suggestion}</div>
-            <div class="textaid-suggestion-actions">
-                <button class="textaid-accept">Accept</button>
-                <button class="textaid-dismiss">×</button>
-            </div>
-        `;
-
-        // Position suggestion
-        const rect = input.getBoundingClientRect();
-        suggestionDiv.style.position = 'absolute';
-        suggestionDiv.style.top = (window.scrollY + rect.bottom + 5) + 'px';
-        suggestionDiv.style.left = (window.scrollX + rect.left) + 'px';
-        suggestionDiv.style.zIndex = '10000';
-
-        document.body.appendChild(suggestionDiv);
-
-        // Add event handlers
-        suggestionDiv.querySelector('.textaid-accept').addEventListener('click', () => {
-            this.acceptSuggestion(input, suggestion);
-            this.hideSuggestion(input);
-        });
-
-        suggestionDiv.querySelector('.textaid-dismiss').addEventListener('click', () => {
-            this.hideSuggestion(input);
-        });
-
-        // Store reference for cleanup
-        input.textaidSuggestion = suggestionDiv;
-    }
-
-    hideSuggestion(input) {
-        if (input.textaidSuggestion) {
-            input.textaidSuggestion.remove();
-            input.textaidSuggestion = null;
-        }
-    }
-
-    acceptSuggestion(input, suggestion) {
-        const currentText = this.getInputText(input);
-        const newText = currentText + ' ' + suggestion;
-
-        if (input.isContentEditable) {
-            input.textContent = newText;
-        } else {
-            input.value = newText;
-        }
-
-        // Trigger input event for frameworks that need it
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-
-        // Focus and move cursor to end
-        input.focus();
-        if (input.setSelectionRange) {
-            input.setSelectionRange(newText.length, newText.length);
-        }
-    }
-
-    processSelectedText(text, action) {
-        let prompt;
-
-        switch (action) {
-            case 'summarize':
-                prompt = `Summarize this text concisely: ${text}`;
-                break;
-            case 'rephrase':
-                prompt = `Rephrase this text professionally: ${text}`;
-                break;
-            case 'ideas':
-                prompt = `Generate 3-5 ideas based on this text: ${text}`;
-                break;
-            case 'expand':
-                prompt = `Expand on this text with more detail: ${text}`;
-                break;
-            default:
-                return;
-        }
-
-        this.showProcessing(action);
-
-        chrome.runtime.sendMessage({
-            action: 'processText',
-            prompt: prompt,
-            type: action
-        });
-    }
-
-    showProcessing(action) {
-        this.showModal(`
-            <div class="textaid-processing">
-                <div class="textaid-spinner"></div>
-                <p>Processing ${action}...</p>
-            </div>
-        `);
-    }
-
-    showModal(content) {
+    if (this.modalState.editable) {
+      const repl = document.createElement("button");
+      repl.type = "button";
+      repl.className = "ta-foot-btn";
+      repl.innerHTML = `${tIcon("replace")}<span>Replace</span>`;
+      repl.addEventListener("click", () => {
+        this.replaceSelection(text);
         this.hideModal();
-
-        this.resultModal = document.createElement('div');
-        this.resultModal.className = 'textaid-modal';
-
-        this.resultModal.innerHTML = `
-            <div class="textaid-modal-content">
-                <button class="textaid-close">&times;</button>
-                ${content}
-            </div>
-        `;
-
-        document.body.appendChild(this.resultModal);
-        console.log('Modal added to body with new Vercel design. Modal element:', this.resultModal);
-
-        // Forcer les styles de la modal pour s'assurer qu'elle s'affiche
-        this.resultModal.style.cssText = `
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100vw !important;
-            height: 100vh !important;
-            background: rgba(0, 0, 0, 0.6) !important;
-            backdrop-filter: blur(8px) !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            z-index: 2147483647 !important;
-            padding: 24px !important;
-            box-sizing: border-box !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            pointer-events: auto !important;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-        `;
-
-        // Forcer les styles du contenu de la modal
-        const modalContent = this.resultModal.querySelector('.textaid-modal-content');
-        if (modalContent) {
-            modalContent.style.cssText = `
-                background: white !important;
-                border-radius: 12px !important;
-                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
-                max-width: 500px !important;
-                max-height: 80vh !important;
-                width: 100% !important;
-                overflow: hidden !important;
-                position: relative !important;
-                padding: 20px !important;
-                box-sizing: border-box !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-                font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-            `;
-        }
-
-        // Forcer les styles du bouton de fermeture
-        const closeButton = this.resultModal.querySelector('.textaid-close');
-        if (closeButton) {
-            closeButton.style.cssText = `
-                position: absolute !important;
-                top: 16px !important;
-                right: 16px !important;
-                width: 32px !important;
-                height: 32px !important;
-                border: none !important;
-                background: #f5f5f5 !important;
-                border-radius: 50% !important;
-                cursor: pointer !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                font-size: 18px !important;
-                color: #737373 !important;
-                font-family: Arial, sans-serif !important;
-                z-index: 2147483647 !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-                pointer-events: auto !important;
-                transition: all 150ms ease !important;
-            `;
-
-            closeButton.addEventListener('mouseenter', () => {
-                closeButton.style.background = '#e5e5e5 !important';
-            });
-
-            closeButton.addEventListener('mouseleave', () => {
-                closeButton.style.background = '#f5f5f5 !important';
-            });
-        }
-
-        // Close handlers
-        this.resultModal.querySelector('.textaid-close').addEventListener('click', () => {
-            this.hideModal();
-        });
-
-        this.resultModal.addEventListener('click', (e) => {
-            if (e.target === this.resultModal) {
-                this.hideModal();
-            }
-        });
+      });
+      foot.appendChild(repl);
     }
 
-    hideModal() {
-        if (this.resultModal) {
-            this.resultModal.remove();
-            this.resultModal = null;
-        }
+    const insert = document.createElement("button");
+    insert.type = "button";
+    insert.className = "ta-foot-btn ta-foot-btn--primary";
+    insert.innerHTML = `${tIcon("arrow-down")}<span>Insert below</span>`;
+    insert.addEventListener("click", () => {
+      this.insertBelow(text);
+      this.hideModal();
+    });
+    foot.appendChild(insert);
+  }
+
+  showStreamError(error) {
+    if (!this.modal) return;
+    const body = this.modal.querySelector("[data-body]");
+    body.classList.remove("ta-modal-body--center");
+    body.innerHTML = `
+      <div class="ta-modal-error">
+        <span class="ta-modal-error-title">${tIcon("alert-circle")}<span>Something went wrong</span></span>
+        <span class="ta-modal-error-msg"></span>
+      </div>`;
+    body.querySelector(".ta-modal-error-msg").textContent = error || "Unknown error";
+    const stream = this.modal.querySelector(".ta-streaming");
+    if (stream) stream.remove();
+  }
+
+  replaceSelection(text) {
+    const active = document.activeElement;
+    if (active && (active.tagName === "TEXTAREA" || active.tagName === "INPUT")) {
+      const start = active.selectionStart;
+      const end = active.selectionEnd;
+      const v = active.value;
+      active.value = v.slice(0, start) + text + v.slice(end);
+      const pos = start + text.length;
+      active.setSelectionRange(pos, pos);
+      active.dispatchEvent(new Event("input", { bubbles: true }));
+      return;
     }
-
-    handleMessage(message, sender, sendResponse) {
-        console.log('TextAid content script received message:', message.action);
-
-        switch (message.action) {
-            case 'showProcessing':
-                this.showProcessing(message.menuAction);
-                break;
-
-            case 'showResult':
-                if (message.error) {
-                    console.log('Showing error:', message.error);
-                    this.showModal(`
-                        <div class="textaid-error">
-                            <h3>Error</h3>
-                            <p>${message.error}</p>
-                        </div>
-                    `);
-                } else {
-                    console.log('Showing result:', message.result ? message.result.substring(0, 100) + '...' : 'empty');
-                    this.showModal(`
-                        <div class="textaid-result">
-                            <h3>Result</h3>
-                            <div class="textaid-result-text">${message.result}</div>
-                            <div class="textaid-result-actions">
-                                <button class="textaid-copy">Copy to Clipboard</button>
-                            </div>
-                        </div>
-                    `);
-
-                    // Add copy functionality
-                    const copyBtn = this.resultModal.querySelector('.textaid-copy');
-                    copyBtn.addEventListener('click', () => {
-                        navigator.clipboard.writeText(message.result).then(() => {
-                            copyBtn.textContent = 'Copied!';
-                            setTimeout(() => copyBtn.textContent = 'Copy to Clipboard', 2000);
-                        });
-                    });
-                }
-                break;
-        }
+    if (this.modalState && this.modalState.range) {
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(this.modalState.range);
     }
+    if (document.queryCommandSupported && document.queryCommandSupported("insertText")) {
+      const ok = document.execCommand("insertText", false, text);
+      if (ok) return;
+    }
+    navigator.clipboard.writeText(text).then(() => this.toastMsg("Copied to clipboard"));
+  }
+
+  insertBelow(text) {
+    const insertion = "\n\n" + text;
+    const active = document.activeElement;
+    if (active && (active.tagName === "TEXTAREA" || active.tagName === "INPUT")) {
+      const end = active.selectionEnd;
+      const v = active.value;
+      active.value = v.slice(0, end) + insertion + v.slice(end);
+      const pos = end + insertion.length;
+      active.setSelectionRange(pos, pos);
+      active.dispatchEvent(new Event("input", { bubbles: true }));
+      return;
+    }
+    if (this.modalState && this.modalState.range && this.modalState.editable) {
+      const range = this.modalState.range.cloneRange();
+      range.collapse(false);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      if (document.queryCommandSupported && document.queryCommandSupported("insertText")) {
+        const ok = document.execCommand("insertText", false, insertion);
+        if (ok) return;
+      }
+    }
+    navigator.clipboard.writeText(text).then(() => this.toastMsg("Copied to clipboard"));
+  }
+
+  saveHistory() {
+    if (!this.modalState) return;
+    const text = this.modalState.text || "";
+    if (!text) return;
+    const record = {
+      id: Date.now() + "-" + Math.random().toString(36).slice(2, 7),
+      action: this.modalState.action,
+      snippet: text.slice(0, 80).replace(/\s+/g, " "),
+      fullText: text,
+      ts: Date.now(),
+    };
+    chrome.runtime.sendMessage({ action: "saveHistory", record });
+  }
+
+  toastMsg(message) {
+    if (this.toast) this.toast.remove();
+    if (this.toastTimer) clearTimeout(this.toastTimer);
+    const t = document.createElement("div");
+    t.className = "textaid-toast textaid-root";
+    t.textContent = message;
+    document.body.appendChild(t);
+    this.toast = t;
+    requestAnimationFrame(() => t.classList.add("is-visible"));
+    this.toastTimer = setTimeout(() => {
+      t.classList.remove("is-visible");
+      setTimeout(() => t.remove(), 200);
+    }, 1800);
+  }
+
+  onMessage(msg) {
+    if (!msg || !msg.action) return;
+    switch (msg.action) {
+      case "showProcessing":
+        this.openResultModal(msg.menuAction || "result");
+        break;
+      case "streamChunk":
+        this.appendStream(msg.chunk || "");
+        break;
+      case "streamDone":
+        this.finishStream();
+        break;
+      case "streamError":
+        this.showStreamError(msg.error);
+        break;
+      case "showResult":
+        if (!this.modal) this.openResultModal(msg.type || "result");
+        if (msg.error) {
+          this.showStreamError(msg.error);
+        } else {
+          this.appendStream(msg.result || "");
+          this.finishStream();
+        }
+        break;
+      case "showToolbarFromShortcut":
+        this.handleSelection();
+        if (!this.toolbar) this.toastMsg("Select text first");
+        break;
+    }
+  }
 }
 
-// Initialize content script when DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => new TextAidContent());
-} else {
-    new TextAidContent();
-}
+new TextAid();

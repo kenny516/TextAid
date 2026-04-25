@@ -57,19 +57,19 @@ export function ExtensionMockup() {
 function FloatingToolbar() {
     return (
         <div
-            className="absolute rounded-full border border-white/10 bg-[#1a1a1a] p-1.5"
+            className="absolute rounded-[10px] border border-white/[0.08] bg-[#0a0a0a] p-1 shadow-[0_8px_24px_rgba(0,0,0,0.4)]"
             style={{
-                top: "calc(50% - 8px)",
+                top: "calc(50% - 6px)",
                 left: "8%",
             }}
         >
-            <div className="flex items-center gap-1">
-                <ToolBtn icon={<SummarizeIcon />} label="Summarize" hot />
+            <div className="flex items-center gap-[2px]">
+                <ToolBtn icon={<SummarizeIcon />} label="Summarize" showLabel />
                 <ToolBtn icon={<RewriteIcon />} label="Rewrite" />
-                <ToolBtn icon={<ExpandIcon />} label="Expand" />
                 <ToolBtn icon={<IdeasIcon />} label="Ideas" />
-                <span className="mx-1 h-5 w-px bg-white/10" />
-                <ToolBtn icon={<MoreIcon />} label="More" tiny />
+                <ToolBtn icon={<ExpandIcon />} label="Expand" />
+                <span className="mx-[2px] h-4 w-px bg-white/[0.08]" />
+                <ToolBtn icon={<MoreIcon />} label="More" />
             </div>
         </div>
     );
@@ -78,26 +78,22 @@ function FloatingToolbar() {
 function ToolBtn({
     icon,
     label,
-    hot,
-    tiny,
+    showLabel,
 }: {
     icon: React.ReactNode;
     label: string;
-    hot?: boolean;
-    tiny?: boolean;
+    showLabel?: boolean;
 }) {
     return (
         <button
+            aria-label={label}
             className={
-                "inline-flex items-center gap-1.5 rounded-full transition-colors " +
-                (hot
-                    ? "bg-white px-3 py-1.5 text-[0.78rem] font-medium text-[#0a0a0a] hover:opacity-90"
-                    : "px-3 py-1.5 text-[0.78rem] text-white/70 hover:bg-white/10 hover:text-white") +
-                (tiny ? " px-2" : "")
+                "inline-flex h-7 items-center justify-center gap-1.5 rounded-md text-white/85 transition-colors hover:bg-white/[0.06] " +
+                (showLabel ? "px-2.5 text-[0.72rem]" : "w-7")
             }
         >
-            <span className={hot ? "text-[#0a0a0a]" : "text-white/60"}>{icon}</span>
-            {!tiny && <span>{label}</span>}
+            <span className="text-white/80">{icon}</span>
+            {showLabel && <span className="font-medium">{label}</span>}
         </button>
     );
 }
@@ -105,31 +101,49 @@ function ToolBtn({
 function SuggestionCard() {
     return (
         <div
-            className="absolute hidden rounded-xl border border-white/10 bg-[#111] p-4 lg:block"
+            className="absolute hidden overflow-hidden rounded-xl border border-white/[0.08] bg-[#0a0a0a] shadow-[0_20px_50px_rgba(0,0,0,0.6)] lg:block"
             style={{
                 right: "5%",
                 bottom: "8%",
                 width: "300px",
             }}
         >
-            <div className="flex items-center gap-2">
-                <span className="inline-block h-1.5 w-1.5 rounded-full bg-white" />
-                <span className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-white/55">
-                    Summary · Gemini
-                </span>
+            {/* Header — matches modal head: 44px, mono uppercase label */}
+            <div className="flex h-11 items-center justify-between border-b border-white/[0.08] px-4">
+                <div className="flex items-center gap-2.5">
+                    <span className="relative inline-flex h-1.5 w-1.5">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white/40" />
+                        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white" />
+                    </span>
+                    <span className="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-white/60">
+                        Summary
+                    </span>
+                    <span className="font-mono text-[0.6rem] text-white/30">·</span>
+                    <span className="font-mono text-[0.6rem] text-white/40">streaming</span>
+                </div>
+                <button
+                    aria-label="Close"
+                    className="inline-flex h-6 w-6 items-center justify-center rounded-md text-white/45 hover:bg-white/[0.06] hover:text-white/80"
+                >
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" aria-hidden>
+                        <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                    </svg>
+                </button>
             </div>
-            <ul className="mt-3 space-y-2 text-[0.84rem] leading-[1.55] text-white/75">
-                <li className="flex gap-2">
-                    <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-white/45" />
+
+            {/* Body */}
+            <ul className="space-y-2 px-4 py-3.5 text-[0.83rem] leading-[1.55] text-white/80">
+                <li className="flex gap-2.5">
+                    <span className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-white/45" />
                     Writing is no longer solitary — AI sits beside the cursor.
                 </li>
-                <li className="flex gap-2">
-                    <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-white/45" />
+                <li className="flex gap-2.5">
+                    <span className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-white/45" />
                     The blank page becomes a lit, listening surface.
                 </li>
-                <li className="flex gap-2">
-                    <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-white/45" />
-                    Tools should write <em>with</em> you, not for you.
+                <li className="flex gap-2.5">
+                    <span className="mt-[7px] h-1 w-1 shrink-0 rounded-full bg-white/45" />
+                    Tools should write <em className="not-italic text-white">with</em> you, not for you.
                 </li>
             </ul>
         </div>

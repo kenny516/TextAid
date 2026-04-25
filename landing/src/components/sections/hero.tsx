@@ -9,7 +9,7 @@ export function Hero() {
             className="px-6 pt-32 pb-20 sm:pt-40"
         >
             <div className="mx-auto max-w-5xl text-center">
-                <span className="eyebrow">v0.4 · Free, open source</span>
+                <span className="eyebrow">v1.2.0 · Free, open source</span>
 
                 <div className="mt-6">
                     <SplitText
@@ -32,7 +32,7 @@ export function Hero() {
 
                 <div className="reveal mt-8 flex flex-wrap items-center justify-center gap-3">
                     <Button size="lg" variant="primary" asChild>
-                        <a href="#install">Install for Chrome</a>
+                        <a href="#install">Install TextAid</a>
                     </Button>
                     <Button size="lg" variant="outline" asChild>
                         <a

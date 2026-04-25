@@ -1,8 +1,9 @@
+import { Link } from "react-router-dom";
 import { Button } from "../ui/button";
 
 export function CtaFooter() {
     return (
-        <section id="install" className="px-6 pt-20 pb-12 sm:pt-32">
+        <section className="px-6 pt-20 pb-12 sm:pt-32">
             <div className="mx-auto max-w-5xl">
                 <div className="mx-auto max-w-2xl text-center">
                     <span className="eyebrow">Ready when you are</span>
@@ -16,22 +17,10 @@ export function CtaFooter() {
 
                     <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
                         <Button size="lg" variant="primary" asChild>
-                            <a
-                                href="https://github.com/kenny516/TextAid"
-                                target="_blank"
-                                rel="noreferrer"
-                            >
-                                Add to Chrome
-                            </a>
+                            <a href="#install">Download TextAid</a>
                         </Button>
                         <Button size="lg" variant="outline" asChild>
-                            <a
-                                href="https://github.com/kenny516/TextAid"
-                                target="_blank"
-                                rel="noreferrer"
-                            >
-                                View source on GitHub
-                            </a>
+                            <Link to="/docs">Read the docs</Link>
                         </Button>
                     </div>
 
@@ -42,9 +31,11 @@ export function CtaFooter() {
 
                 <footer className="mt-24 flex flex-col items-center justify-between gap-6 border-t border-white/[0.08] pt-10 sm:flex-row">
                     <div className="flex items-center gap-2.5">
-                        <span
+                        <img
+                            src="/icon-textaid.png"
+                            alt=""
                             aria-hidden
-                            className="inline-block h-4 w-4 rounded-full border border-white"
+                            className="h-5 w-5 rounded"
                         />
                         <span className="font-display text-[0.95rem] font-medium tracking-[-0.02em] text-white">
                             TextAid
@@ -54,9 +45,11 @@ export function CtaFooter() {
                         </span>
                     </div>
 
-                    <nav className="flex items-center gap-5 text-[0.85rem] text-soft">
+                    <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[0.85rem] text-soft">
                         <a href="#features" className="hover:text-white">Features</a>
+                        <Link to="/docs" className="hover:text-white">Docs</Link>
                         <a href="#privacy" className="hover:text-white">Privacy</a>
+                        <a href="#support" className="hover:text-white">Sponsor</a>
                         <a
                             href="https://github.com/kenny516/TextAid"
                             target="_blank"
