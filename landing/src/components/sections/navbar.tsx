@@ -1,48 +1,56 @@
-import { ArrowUpRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-
-const links = [
-  { label: "Home", href: "#home" },
-  { label: "Features", href: "#features" },
-  { label: "How It Works", href: "#workflow" },
-  { label: "Proof", href: "#proof" },
-  { label: "Download", href: "#download" },
-];
+import { Button } from "../ui/button";
 
 export function Navbar() {
-  return (
-    <header className="fixed left-0 right-0 top-4 z-50 px-4 py-3 md:px-8 lg:px-16">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
-        <a href="#home" className="flex items-center gap-3">
-          <div className="liquid-glass flex h-12 w-12 items-center justify-center rounded-full">
-            <span className="font-heading text-2xl italic text-white">T</span>
-          </div>
-          <div className="hidden md:block">
-            <p className="font-body text-sm font-medium text-white">TextAid</p>
-            <p className="font-body text-xs text-white/50">AI writing for every tab</p>
-          </div>
-        </a>
+    return (
+        <header className="sticky top-0 z-50 border-b border-white/[0.08] bg-[#0a0a0a]/80 backdrop-blur-md">
+            <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-6">
+                <a href="#top" className="flex items-center gap-2">
+                    <Logo />
+                    <span className="font-display text-[0.95rem] font-medium tracking-[-0.02em]">
+                        TextAid
+                    </span>
+                </a>
 
-        <nav className="hidden md:flex">
-          <div className="liquid-glass flex items-center gap-1 rounded-full px-1.5 py-1">
-            {links.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                className="rounded-full px-3 py-2 font-body text-sm font-medium text-white/90 transition-colors duration-300 hover:text-white"
-              >
-                {link.label}
-              </a>
-            ))}
-            <Button asChild variant="secondary" size="sm" className="ml-1 rounded-full px-3.5 py-1.5">
-              <a href="#download">
-                Download App
-                <ArrowUpRight className="h-4 w-4" />
-              </a>
-            </Button>
-          </div>
-        </nav>
-      </div>
-    </header>
-  );
+                <nav className="hidden items-center gap-6 md:flex">
+                    {[
+                        ["Features", "#features"],
+                        ["Demo", "#demo"],
+                        ["Providers", "#providers"],
+                        ["Privacy", "#privacy"],
+                    ].map(([label, href]) => (
+                        <a
+                            key={href}
+                            href={href}
+                            className="text-[0.85rem] text-white/60 transition-colors hover:text-white"
+                        >
+                            {label}
+                        </a>
+                    ))}
+                </nav>
+
+                <div className="flex items-center gap-4">
+                    <a
+                        href="https://github.com/kenny516/TextAid"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="hidden text-[0.85rem] text-white/60 transition-colors hover:text-white sm:inline"
+                    >
+                        GitHub
+                    </a>
+                    <Button size="sm" variant="primary" asChild>
+                        <a href="#install">Install</a>
+                    </Button>
+                </div>
+            </div>
+        </header>
+    );
+}
+
+function Logo() {
+    return (
+        <span
+            aria-hidden
+            className="inline-block h-4 w-4 rounded-full border border-white"
+        />
+    );
 }
