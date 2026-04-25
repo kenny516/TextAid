@@ -1,6 +1,4 @@
 const SPONSORS = "https://github.com/sponsors/kenny516";
-const BMC = "https://www.buymeacoffee.com/kenny516";
-const KOFI = "https://ko-fi.com/kenny516";
 
 export function Support() {
     return (

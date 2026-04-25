@@ -66,7 +66,7 @@ export function GitHubStars({ className = "" }: { className?: string }) {
                     : "Star TextAid on GitHub"
             }
             className={
-                "inline-flex h-7 items-center gap-1.5 rounded-md border border-white/[0.12] bg-white/[0.03] pr-2 pl-2 text-[0.78rem] text-white/75 transition-colors hover:border-white/25 hover:bg-white/[0.06] hover:text-white " +
+                "inline-flex h-7 items-center gap-1.5 rounded-md border border-amber-500/30 bg-amber-500/10 pr-2 pl-2 text-[0.78rem] text-amber-300 transition-colors hover:border-amber-500/50 hover:bg-amber-500/15 hover:text-amber-200 " +
                 className
             }
         >
@@ -75,14 +75,14 @@ export function GitHubStars({ className = "" }: { className?: string }) {
                 width="13"
                 height="13"
                 aria-hidden
-                className="shrink-0"
+                className="shrink-0 text-amber-400"
                 fill="currentColor"
             >
                 <path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z" />
             </svg>
             <span className="font-mono tabular-nums">Star</span>
-            <span className="ml-0.5 h-3 w-px bg-white/15" aria-hidden />
-            <span className="font-mono tabular-nums text-white/55">
+            <span className="ml-0.5 h-3 w-px bg-amber-500/25" aria-hidden />
+            <span className="font-mono tabular-nums text-amber-400/70">
                 {stars != null ? format(stars) : "—"}
             </span>
         </a>
