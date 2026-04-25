@@ -31,9 +31,11 @@ export function CtaFooter() {
 
                 <footer className="mt-24 flex flex-col items-center justify-between gap-6 border-t border-white/[0.08] pt-10 sm:flex-row">
                     <div className="flex items-center gap-2.5">
-                        <span
+                        <img
+                            src="/icon-textaid.png"
+                            alt=""
                             aria-hidden
-                            className="inline-block h-4 w-4 rounded-full border border-white"
+                            className="h-5 w-5 rounded"
                         />
                         <span className="font-display text-[0.95rem] font-medium tracking-[-0.02em] text-white">
                             TextAid

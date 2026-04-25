@@ -80,9 +80,11 @@ export function Navbar() {
 
 function Logo() {
     return (
-        <span
+        <img
+            src="/icon-textaid.png"
+            alt=""
             aria-hidden
-            className="inline-block h-4 w-4 rounded-full border border-white"
+            className="h-5 w-5 rounded"
         />
     );
 }

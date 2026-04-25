@@ -23,7 +23,13 @@
 
   "action": {
     "default_popup": "popup.html",
-    "default_title": "TextAid"
+    "default_title": "TextAid",
+    "default_icon": {
+      "16": "icons/icon-textaid.png",
+      "32": "icons/icon-textaid.png",
+      "48": "icons/icon-textaid.png",
+      "128": "icons/icon-textaid.png"
+    }
   },
 
   "commands": {
@@ -37,9 +43,9 @@
   },
 
   "icons": {
-    "16": "icons/icon16.svg",
-    "48": "icons/icon48.svg",
-    "128": "icons/icon128.svg"
+    "16": "icons/icon-textaid.png",
+    "48": "icons/icon-textaid.png",
+    "128": "icons/icon-textaid.png"
   },
 
   "web_accessible_resources": [

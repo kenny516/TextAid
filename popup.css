@@ -63,10 +63,10 @@ body {
   gap: 8px;
 }
 .ta-logo {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  border: 1.5px solid var(--fg);
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  background: url("icons/icon-textaid.png") center/contain no-repeat;
   display: inline-block;
 }
 .ta-wordmark {
