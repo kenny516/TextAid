@@ -25,7 +25,7 @@ export function Support() {
                         </p>
                     </div>
 
-                    <div className="grid gap-3 self-center sm:grid-cols-2">
+                    <div className="flex flex-col gap-3 self-center sm:max-w-sm">
                         <SupportCard
                             href={SPONSORS}
                             label="GitHub Sponsors"
@@ -33,20 +33,6 @@ export function Support() {
                             cta="Sponsor on GitHub"
                             primary
                             icon={<HeartGlyph />}
-                        />
-                        <SupportCard
-                            href={BMC}
-                            label="Buy Me a Coffee"
-                            sub="One-time tip"
-                            cta="Send a coffee"
-                            icon={<CoffeeGlyph />}
-                        />
-                        <SupportCard
-                            href={KOFI}
-                            label="Ko-fi"
-                            sub="0% platform fees"
-                            cta="Tip on Ko-fi"
-                            icon={<KofiGlyph />}
                         />
                         <SupportCard
                             href="https://github.com/kenny516/TextAid"
