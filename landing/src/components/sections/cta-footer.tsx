@@ -1,8 +1,9 @@
+import { Link } from "react-router-dom";
 import { Button } from "../ui/button";
 
 export function CtaFooter() {
     return (
-        <section id="install" className="px-6 pt-20 pb-12 sm:pt-32">
+        <section className="px-6 pt-20 pb-12 sm:pt-32">
             <div className="mx-auto max-w-5xl">
                 <div className="mx-auto max-w-2xl text-center">
                     <span className="eyebrow">Ready when you are</span>
@@ -16,22 +17,10 @@ export function CtaFooter() {
 
                     <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
                         <Button size="lg" variant="primary" asChild>
-                            <a
-                                href="https://github.com/kenny516/TextAid"
-                                target="_blank"
-                                rel="noreferrer"
-                            >
-                                Add to Chrome
-                            </a>
+                            <a href="#install">Download TextAid</a>
                         </Button>
                         <Button size="lg" variant="outline" asChild>
-                            <a
-                                href="https://github.com/kenny516/TextAid"
-                                target="_blank"
-                                rel="noreferrer"
-                            >
-                                View source on GitHub
-                            </a>
+                            <Link to="/docs">Read the docs</Link>
                         </Button>
                     </div>
 
@@ -56,6 +45,7 @@ export function CtaFooter() {
 
                     <nav className="flex items-center gap-5 text-[0.85rem] text-soft">
                         <a href="#features" className="hover:text-white">Features</a>
+                        <Link to="/docs" className="hover:text-white">Docs</Link>
                         <a href="#privacy" className="hover:text-white">Privacy</a>
                         <a
                             href="https://github.com/kenny516/TextAid"

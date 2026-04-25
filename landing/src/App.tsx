@@ -1,23 +1,25 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Home } from "./pages/Home";
+import { Docs } from "./pages/Docs";
 import { Navbar } from "./components/sections/navbar";
-import { Hero } from "./components/sections/hero";
-import { LiveDemo } from "./components/sections/live-demo";
-import { Features } from "./components/sections/features";
-import { Providers } from "./components/sections/providers";
-import { Privacy } from "./components/sections/privacy";
-import { CtaFooter } from "./components/sections/cta-footer";
 
 export default function App() {
     return (
-        <div className="min-h-screen bg-[#0a0a0a] text-white">
-            <Navbar />
-            <main>
-                <Hero />
-                <LiveDemo />
-                <Features />
-                <Providers />
-                <Privacy />
-                <CtaFooter />
-            </main>
-        </div>
+        <BrowserRouter>
+            <div className="min-h-screen bg-[#0a0a0a] text-white">
+                <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route
+                        path="/docs/*"
+                        element={
+                            <>
+                                <Navbar />
+                                <Docs />
+                            </>
+                        }
+                    />
+                </Routes>
+            </div>
+        </BrowserRouter>
     );
 }
