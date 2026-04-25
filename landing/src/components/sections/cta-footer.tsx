@@ -45,10 +45,11 @@ export function CtaFooter() {
                         </span>
                     </div>
 
-                    <nav className="flex items-center gap-5 text-[0.85rem] text-soft">
+                    <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[0.85rem] text-soft">
                         <a href="#features" className="hover:text-white">Features</a>
                         <Link to="/docs" className="hover:text-white">Docs</Link>
                         <a href="#privacy" className="hover:text-white">Privacy</a>
+                        <a href="#support" className="hover:text-white">Sponsor</a>
                         <a
                             href="https://github.com/kenny516/TextAid"
                             target="_blank"
