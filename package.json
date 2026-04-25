@@ -1,21 +1,32 @@
 {
   "name": "textaid-extension",
-  "version": "1.0.0",
-  "description": "AI-powered text assistant for browsers",
+  "version": "1.1.0",
+  "description": "Cross-browser AI writing assistant (Chrome, Firefox, Brave, Edge, Opera, Arc, Vivaldi, Zen, Safari)",
+  "type": "module",
   "scripts": {
+    "build": "node scripts/build.mjs",
+    "build:chrome": "node scripts/build.mjs chrome",
+    "build:firefox": "node scripts/build.mjs firefox",
+    "dev": "node scripts/watch.mjs",
+    "dev:chrome": "node scripts/watch.mjs chrome",
+    "dev:firefox": "node scripts/watch.mjs firefox",
     "test": "echo \"Tests will be added in Phase 3\"",
-    "lint": "echo \"Linting configuration ready\"",
-    "build": "echo \"Extension built successfully - load unpacked in Chrome\"",
-    "dev": "echo \"Development mode - auto-reload on changes\""
+    "lint": "echo \"Linting configuration ready\""
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "adm-zip": "^0.5.16"
+  },
   "keywords": [
+    "browser-extension",
     "chrome-extension",
+    "firefox-extension",
     "ai",
     "text-assistant",
     "productivity",
-    "openai"
+    "openai",
+    "gemini"
   ],
   "author": "TextAid Team",
   "license": "MIT"
 }
+

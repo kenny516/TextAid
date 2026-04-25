@@ -5,6 +5,29 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025
+
+### Changed
+- Full visual rewrite to match the new TextAid landing page (dark monochrome,
+  Geist font, hairline borders, white accent — Raycast/Linear/Apple feel).
+- Stripped all `element.style.cssText` blocks from `content.js`; injected UI now
+  relies entirely on `content.css` with double-class specificity and `all: revert`.
+- Removed all emoji from the UI; replaced with inline lucide-style SVG icons.
+- Default Gemini model bumped to `gemini-2.0-flash`.
+- Default for inline suggestions flipped to OFF.
+
+### Added
+- Streaming responses (SSE) for both OpenAI and Gemini.
+- "Replace selection" and "Insert below" actions in the result modal.
+- "Test" button in the popup that pings the provider with the current API key.
+- Local history of the last 20 results, surfaced as 5 most-recent rows in popup.
+- Keyboard shortcut `Ctrl/Cmd + Shift + Space` to summon the toolbar on the
+  current selection.
+- Custom prompt action and a "more" dropdown (Translate, Fix grammar, Make
+  formal, Make casual, Custom prompt…).
+- Friendlier error messages for 401/403/429 and network failures.
+- 128px extension icon.
+
 ## [2.0.0] - 2025-08-23
 
 ### 🎨 Ajouté
