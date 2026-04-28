@@ -169,9 +169,10 @@ const SECTIONS: Section[] = [
                         tag="Recommended · Free tier"
                         url="https://aistudio.google.com/app/apikey"
                         bullets={[
-                            "Free up to 1,500 requests/day",
-                            "1M tokens/month included",
-                            "Fast on gemini-2.0-flash",
+                            "Free up to 1,500 requests/day on Flash models",
+                            "1M tokens context window",
+                            "Recommended: gemini-2.5-flash (free, GA)",
+                            "Pro models (2.5 Pro, 3 Pro) require billing",
                         ]}
                     />
                     <KeyCard
@@ -179,9 +180,10 @@ const SECTIONS: Section[] = [
                         tag="Pay-as-you-go"
                         url="https://platform.openai.com/api-keys"
                         bullets={[
-                            "Best quality on gpt-4o",
-                            "Cheapest on gpt-4o-mini",
-                            "~$0.0001 per short rewrite",
+                            "$5 trial credit on new accounts",
+                            "Cheapest: gpt-4.1-nano (~$0.10/1M in)",
+                            "Recommended: gpt-4o-mini",
+                            "Premium: gpt-4.1, gpt-5",
                         ]}
                     />
                 </div>
@@ -213,8 +215,11 @@ const SECTIONS: Section[] = [
                         </>,
                         <>
                             Pick a <strong className="text-white">Model</strong>:{" "}
-                            <Code>gemini-2.0-flash</Code> or <Code>gpt-4o-mini</Code> are
-                            great defaults.
+                            <Code>gemini-2.5-flash</Code> (free) or <Code>gpt-4o-mini</Code>{" "}
+                            are great defaults. The popup tags each model{" "}
+                            <strong className="text-white">Free</strong> or{" "}
+                            <strong className="text-white">Paid</strong> so you know what
+                            you&apos;re picking.
                         </>,
                         <>
                             Pick a default <strong className="text-white">Tone</strong> for{" "}
@@ -243,7 +248,10 @@ const SECTIONS: Section[] = [
             <>
                 <Table
                     rows={[
-                        [<Kbd>⌘ ⇧ Space</Kbd>, "Open popup from anywhere (Chromium)"],
+                        [<Kbd>Ctrl ⇧ Y</Kbd>, "Show the floating toolbar on the current selection (⌘ ⇧ Y on macOS)"],
+                        [<Kbd>Alt ⇧ S</Kbd>, "Summarize the current selection directly"],
+                        [<Kbd>Alt ⇧ R</Kbd>, "Rewrite the current selection directly"],
+                        [<Kbd>Alt ⇧ T</Kbd>, "Translate the current selection to English"],
                         [<Kbd>Esc</Kbd>, "Close the result modal or any dropdown"],
                         [<Kbd>⌘ Enter</Kbd>, "Submit a custom prompt"],
                         [<Kbd>↑ ↓</Kbd>, "Navigate model / tone dropdowns"],

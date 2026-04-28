@@ -7,6 +7,41 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added
+- Three new keyboard shortcuts for direct actions on the current selection:
+  `Alt+Shift+S` (Summarize), `Alt+Shift+R` (Rewrite), `Alt+Shift+T`
+  (Translate to English).
+- **Free / Paid** badge next to every model in the popup dropdown so it's
+  obvious which Gemini models stay free and which require billing.
+- Refreshed model lineup (April 2026):
+  - Gemini: `gemini-2.5-flash` (new default), `gemini-2.5-flash-lite`,
+    `gemini-3-flash`, `gemini-2.5-pro`, `gemini-3-pro` (legacy `2.0-flash`
+    and `1.5-pro` kept for back-compat).
+  - OpenAI: added `gpt-4.1-nano`, `gpt-4.1-mini`, `gpt-4.1`, `gpt-5-mini`,
+    `gpt-5` alongside the existing `gpt-4o-mini` / `gpt-4o`.
+- **Markdown rendering** in the result modal: bold, italic, lists, code
+  blocks, inline code, headings, blockquotes, links and `---` rules now
+  display as formatted HTML instead of raw markdown characters. Copy /
+  Replace / Insert still use the raw markdown text.
+- **Translate to…** submenu with 16 languages (English, Français, Español,
+  Deutsch, Italiano, Português, Nederlands, Polski, Русский, Українська,
+  Türkçe, العربية, 中文, 日本語, 한국어, हिन्दी) — replaces the old
+  hard-coded "Translate to English" entry.
+- Richer API error messages: parses Gemini (`UNAVAILABLE`,
+  `RESOURCE_EXHAUSTED`, `INVALID_ARGUMENT`, `PERMISSION_DENIED`, …) and
+  OpenAI (`rate_limit_exceeded`, `insufficient_quota`, `model_not_found`,
+  `context_length_exceeded`, …) error bodies and surfaces actionable
+  hints (e.g. "switch to a Flash / mini model", "add billing", "shorten
+  the text"). Honors the `Retry-After` header when present.
+
+### Changed
+- Default toolbar shortcut is now `Ctrl+Shift+Y` (`Cmd+Shift+Y` on macOS)
+  instead of `Ctrl+Shift+Space` to avoid conflicts with input methods.
+- Default Gemini model bumped from `gemini-2.0-flash` to `gemini-2.5-flash`
+  (still on the free tier, GA, recommended by Google).
+- Popup shortcut hint now reads the user's actual binding via
+  `chrome.commands.getAll`, so customised shortcuts display correctly.
+
 ## [1.2.0] - 2026-04-25
 
 ### Added
