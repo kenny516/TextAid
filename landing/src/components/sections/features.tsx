@@ -55,7 +55,7 @@ export function Features() {
                     {items.map((item) => {
                         const Icon = item.icon;
                         return (
-                            <div key={item.title} className="bg-[#0a0a0a] p-8">
+                            <div key={item.title} className="light-card bg-[#0a0a0a] p-8">
                                 <Icon size={18} className="text-white" strokeWidth={1.6} />
                                 <h3 className="mt-6 text-[1rem] font-medium tracking-[-0.01em] text-white">
                                     {item.title}

@@ -15,6 +15,18 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap"
         rel="stylesheet" />
+    <script>
+        (function () {
+            try {
+                var saved = localStorage.getItem("textaid-theme");
+                if (saved === "light") {
+                    document.documentElement.classList.add("light");
+                    var m = document.querySelector('meta[name="theme-color"]');
+                    if (m) m.setAttribute("content", "#fafafa");
+                }
+            } catch (e) { /* ignore */ }
+        })();
+    </script>
 </head>
 
 <body>
