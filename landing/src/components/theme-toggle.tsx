@@ -15,6 +15,8 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
     useEffect(() => {
         const root = document.documentElement;
         root.classList.toggle("light", theme === "light");
+        // Debug: force attribute for easier inspection
+        root.setAttribute("data-theme", theme);
         try {
             localStorage.setItem("textaid-theme", theme);
         } catch {
