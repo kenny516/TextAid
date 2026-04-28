@@ -6,7 +6,7 @@ import { Navbar } from "./components/sections/navbar";
 export default function App() {
     return (
         <BrowserRouter>
-            <div className="min-h-screen bg-[#0a0a0a] text-white">
+            <div className="min-h-screen bg-[#0a0a0a] text-white transition-colors">
                 <Routes>
                     <Route path="/" element={<Home />} />
                     <Route

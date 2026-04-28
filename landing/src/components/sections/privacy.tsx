@@ -35,7 +35,7 @@ export function Privacy() {
 
                 <ul className="grid gap-px overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.08] sm:grid-cols-2">
                     {tenets.map((t) => (
-                        <li key={t.title} className="bg-[#0a0a0a] p-8">
+                        <li key={t.title} className="bg-[#0a0a0a] light-card p-8">
                             <h3 className="text-[1rem] font-medium tracking-[-0.01em] text-white">
                                 {t.title}
                             </h3>
