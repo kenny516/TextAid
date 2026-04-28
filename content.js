@@ -22,6 +22,8 @@ const TA_ICONS = {
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>',
   "arrow-down":
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>',
+  "refresh-cw":
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>',
 };
 
 const TA_ACTION_LABELS = {
@@ -36,8 +38,138 @@ const TA_ACTION_LABELS = {
   casual: "CASUAL",
 };
 
+const TA_TRANSLATE_LANGS = [
+  { code: "en", label: "English" },
+  { code: "fr", label: "Français" },
+  { code: "es", label: "Español" },
+  { code: "de", label: "Deutsch" },
+  { code: "it", label: "Italiano" },
+  { code: "pt", label: "Português" },
+  { code: "nl", label: "Nederlands" },
+  { code: "pl", label: "Polski" },
+  { code: "ru", label: "Русский" },
+  { code: "uk", label: "Українська" },
+  { code: "tr", label: "Türkçe" },
+  { code: "ar", label: "العربية" },
+  { code: "zh", label: "中文 (简体)" },
+  { code: "ja", label: "日本語" },
+  { code: "ko", label: "한국어" },
+  { code: "hi", label: "हिन्दी" },
+];
+
 function tIcon(name) {
   return TA_ICONS[name] || "";
+}
+
+function taEscapeHtml(s) {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function taSafeUrl(u) {
+  const s = String(u || "").trim();
+  if (/^(https?:|mailto:)/i.test(s)) return s;
+  return "#";
+}
+
+function taRenderInline(s) {
+  let out = taEscapeHtml(s);
+  out = out.replace(/`([^`\n]+?)`/g, (_m, c) => `<code>${c}</code>`);
+  out = out.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_m, t, u) => {
+    return `<a href="${taEscapeHtml(taSafeUrl(u))}" target="_blank" rel="noopener noreferrer">${t}</a>`;
+  });
+  out = out.replace(/\*\*([^*\n]+?)\*\*/g, "<strong>$1</strong>");
+  out = out.replace(/__([^_\n]+?)__/g, "<strong>$1</strong>");
+  out = out.replace(/(^|[\s(])\*([^*\n]+?)\*(?=[\s).,!?:;]|$)/g, "$1<em>$2</em>");
+  out = out.replace(/(^|[\s(])_([^_\n]+?)_(?=[\s).,!?:;]|$)/g, "$1<em>$2</em>");
+  out = out.replace(/~~([^~\n]+?)~~/g, "<del>$1</del>");
+  return out;
+}
+
+function taRenderMarkdown(src) {
+  const text = String(src || "");
+  const blocks = [];
+  const fenceRe = /```([a-zA-Z0-9_-]*)\n([\s\S]*?)```/g;
+  let lastIdx = 0;
+  let m;
+  while ((m = fenceRe.exec(text)) !== null) {
+    if (m.index > lastIdx) blocks.push({ type: "text", value: text.slice(lastIdx, m.index) });
+    blocks.push({ type: "code", lang: m[1] || "", value: m[2] });
+    lastIdx = m.index + m[0].length;
+  }
+  if (lastIdx < text.length) blocks.push({ type: "text", value: text.slice(lastIdx) });
+
+  const html = [];
+  blocks.forEach((b) => {
+    if (b.type === "code") {
+      html.push(`<pre><code>${taEscapeHtml(b.value.replace(/\n$/, ""))}</code></pre>`);
+      return;
+    }
+    const lines = b.value.split("\n");
+    let i = 0;
+    let para = [];
+    const flushPara = () => {
+      if (!para.length) return;
+      const joined = para.join(" ").trim();
+      if (joined) html.push(`<p>${taRenderInline(joined)}</p>`);
+      para = [];
+    };
+    while (i < lines.length) {
+      const line = lines[i];
+      const trimmed = line.trim();
+      if (!trimmed) { flushPara(); i++; continue; }
+      const h = /^(#{1,6})\s+(.+)$/.exec(trimmed);
+      if (h) {
+        flushPara();
+        const lvl = Math.min(h[1].length + 2, 6);
+        html.push(`<h${lvl}>${taRenderInline(h[2])}</h${lvl}>`);
+        i++; continue;
+      }
+      if (/^>\s?/.test(trimmed)) {
+        flushPara();
+        const buf = [];
+        while (i < lines.length && /^>\s?/.test(lines[i].trim())) {
+          buf.push(lines[i].trim().replace(/^>\s?/, ""));
+          i++;
+        }
+        html.push(`<blockquote>${taRenderInline(buf.join(" "))}</blockquote>`);
+        continue;
+      }
+      if (/^([-*+])\s+/.test(trimmed)) {
+        flushPara();
+        const items = [];
+        while (i < lines.length && /^([-*+])\s+/.test(lines[i].trim())) {
+          items.push(lines[i].trim().replace(/^([-*+])\s+/, ""));
+          i++;
+        }
+        html.push(`<ul>${items.map((it) => `<li>${taRenderInline(it)}</li>`).join("")}</ul>`);
+        continue;
+      }
+      if (/^\d+\.\s+/.test(trimmed)) {
+        flushPara();
+        const items = [];
+        while (i < lines.length && /^\d+\.\s+/.test(lines[i].trim())) {
+          items.push(lines[i].trim().replace(/^\d+\.\s+/, ""));
+          i++;
+        }
+        html.push(`<ol>${items.map((it) => `<li>${taRenderInline(it)}</li>`).join("")}</ol>`);
+        continue;
+      }
+      if (/^([-*_])\1{2,}$/.test(trimmed)) {
+        flushPara();
+        html.push("<hr>");
+        i++; continue;
+      }
+      para.push(trimmed);
+      i++;
+    }
+    flushPara();
+  });
+  return html.join("");
 }
 
 class TextAid {
@@ -101,7 +233,15 @@ class TextAid {
       },
       true
     );
-    document.addEventListener("scroll", () => this.hideToolbar(), true);
+    document.addEventListener(
+      "scroll",
+      (e) => {
+        const t = e.target;
+        if (t && t.nodeType === 1 && t.closest && t.closest(".textaid-root")) return;
+        this.hideToolbar();
+      },
+      true
+    );
 
     chrome.runtime.onMessage.addListener((msg) => this.onMessage(msg));
   }
@@ -249,7 +389,7 @@ class TextAid {
     const dd = document.createElement("div");
     dd.className = "textaid-dropdown textaid-root";
     const items = [
-      { action: "translate", label: "Translate to English" },
+      { action: "__translate", label: "Translate to…", hasSubmenu: true },
       { action: "grammar", label: "Fix grammar" },
       { action: "formal", label: "Make formal" },
       { action: "casual", label: "Make casual" },
@@ -258,12 +398,18 @@ class TextAid {
     items.forEach((it) => {
       const btn = document.createElement("button");
       btn.type = "button";
-      btn.className = "ta-dd-item";
-      btn.textContent = it.label;
+      btn.className = "ta-dd-item" + (it.hasSubmenu ? " ta-dd-item--sub" : "");
+      btn.innerHTML = it.hasSubmenu
+        ? `<span>${it.label}</span><span class="ta-dd-chev">›</span>`
+        : it.label;
       btn.addEventListener("mousedown", (e) => e.preventDefault());
       btn.addEventListener("click", (e) => {
         e.preventDefault();
         e.stopPropagation();
+        if (it.action === "__translate") {
+          this.openTranslateSubmenu(dd);
+          return;
+        }
         this.hideDropdown();
         if (it.action === "__custom") {
           this.openCustomPrompt(false);
@@ -275,6 +421,57 @@ class TextAid {
     });
     document.body.appendChild(dd);
     this.dropdown = dd;
+    this.positionDropdown(dd, anchor);
+  }
+
+  openTranslateSubmenu(dd) {
+    dd.innerHTML = "";
+    const back = document.createElement("button");
+    back.type = "button";
+    back.className = "ta-dd-item ta-dd-item--back";
+    back.innerHTML = `<span class="ta-dd-chev ta-dd-chev--back">‹</span><span>Back</span>`;
+    back.addEventListener("mousedown", (e) => e.preventDefault());
+    back.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.hideDropdown();
+      const moreBtn = document.querySelector(".textaid-toolbar [data-action='__more']");
+      if (moreBtn) this.openMoreDropdown(moreBtn);
+    });
+    dd.appendChild(back);
+
+    const list = document.createElement("div");
+    list.className = "ta-dd-scroll";
+    list.addEventListener(
+      "wheel",
+      (e) => {
+        const atTop = list.scrollTop === 0;
+        const atBottom = list.scrollTop + list.clientHeight >= list.scrollHeight - 1;
+        if ((e.deltaY < 0 && atTop) || (e.deltaY > 0 && atBottom)) {
+          e.preventDefault();
+        }
+        e.stopPropagation();
+      },
+      { passive: false }
+    );
+    TA_TRANSLATE_LANGS.forEach((lang) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "ta-dd-item";
+      btn.textContent = lang.label;
+      btn.addEventListener("mousedown", (e) => e.preventDefault());
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.hideDropdown();
+        this.runAction("translate", { lang: lang.label });
+      });
+      list.appendChild(btn);
+    });
+    dd.appendChild(list);
+  }
+
+  positionDropdown(dd, anchor) {
     const r = anchor.getBoundingClientRect();
     const ddRect = dd.getBoundingClientRect();
     let left = window.scrollX + r.right - ddRect.width;
@@ -290,16 +487,17 @@ class TextAid {
     }
   }
 
-  runAction(action) {
+  runAction(action, opts) {
     const text = this.selectionText;
     if (!text) return;
     const tone = this.settings.suggestionStyle || "professional";
+    const targetLang = (opts && opts.lang) || "English";
     const prompts = {
       summarize: `Summarize the following text concisely in bullet points (under 200 words):\n\n${text}`,
       rephrase: `Rewrite the following text in a ${tone} tone, preserving meaning:\n\n${text}`,
       ideas: `Generate 3-5 related ideas based on the following text:\n\n${text}`,
       expand: `Expand on the following text with more detail and context:\n\n${text}`,
-      translate: `Translate the following text to English. Output only the translation:\n\n${text}`,
+      translate: `Translate the following text to ${targetLang}. Output only the translation, no explanations:\n\n${text}`,
       grammar: `Correct grammar and spelling in the following text. Output only the corrected text:\n\n${text}`,
       formal: `Rewrite the following text in a formal tone. Output only the rewritten text:\n\n${text}`,
       casual: `Rewrite the following text in a casual, friendly tone. Output only the rewritten text:\n\n${text}`,
@@ -308,6 +506,7 @@ class TextAid {
     if (!prompt) return;
     this.hideToolbar();
     this.openResultModal(action);
+    this.modalState.lastPrompt = prompt;
     chrome.runtime.sendMessage({ action: "processText", prompt, type: action });
   }
 
@@ -408,10 +607,12 @@ class TextAid {
     if (!this.modalState.started) {
       this.modalState.started = true;
       body.classList.remove("ta-modal-body--center");
+      body.classList.remove("ta-modal-body--error");
+      body.classList.add("ta-md");
       body.textContent = "";
     }
     this.modalState.text += chunk;
-    body.textContent = this.modalState.text;
+    body.innerHTML = taRenderMarkdown(this.modalState.text);
     body.scrollTop = body.scrollHeight;
   }
 
@@ -419,10 +620,16 @@ class TextAid {
     if (!this.modal || !this.modalState) return;
     const stream = this.modal.querySelector(".ta-streaming");
     if (stream) stream.remove();
+    const body = this.modal.querySelector("[data-body]");
     if (!this.modalState.started) {
-      const body = this.modal.querySelector("[data-body]");
       body.classList.remove("ta-modal-body--center");
-      body.textContent = this.modalState.text || "(empty response)";
+      body.classList.remove("ta-modal-body--error");
+      body.classList.add("ta-md");
+      body.innerHTML = this.modalState.text
+        ? taRenderMarkdown(this.modalState.text)
+        : "<p>(empty response)</p>";
+    } else {
+      body.innerHTML = taRenderMarkdown(this.modalState.text);
     }
     this.renderModalFooter();
     this.saveHistory();
@@ -474,13 +681,90 @@ class TextAid {
   showStreamError(error) {
     if (!this.modal) return;
     const body = this.modal.querySelector("[data-body]");
-    body.classList.remove("ta-modal-body--center");
+    body.classList.remove("ta-md");
+    body.classList.add("ta-modal-body--center");
+    body.classList.add("ta-modal-body--error");
+    const raw = String(error || "Unknown error");
+    const lower = raw.toLowerCase();
+    let kind = "warn";
+    let title = "Something went wrong";
+    if (/quota|insufficient|billing|payment/.test(lower)) {
+      kind = "info";
+      title = "Quota or billing issue";
+    } else if (/rate limit|too many|429/.test(lower)) {
+      kind = "info";
+      title = "Rate limit reached";
+    } else if (/api key|unauthorized|invalid_api_key|permission/.test(lower)) {
+      kind = "error";
+      title = "API key problem";
+    } else if (/overload|unavailable|temporarily|503|502|504/.test(lower)) {
+      kind = "warn";
+      title = "Model temporarily unavailable";
+    } else if (/network|fetch|offline/.test(lower)) {
+      kind = "warn";
+      title = "Network error";
+    } else if (/model.*not found|invalid.*model|404/.test(lower)) {
+      kind = "error";
+      title = "Model not found";
+    } else if (/context|too long|413/.test(lower)) {
+      kind = "info";
+      title = "Selection too long";
+    }
+    const canRetry = this.modalState && this.modalState.lastPrompt;
+    const needsKey = /api key|unauthorized|invalid_api_key/.test(lower);
     body.innerHTML = `
-      <div class="ta-modal-error">
-        <span class="ta-modal-error-title">${tIcon("alert-circle")}<span>Something went wrong</span></span>
-        <span class="ta-modal-error-msg"></span>
+      <div class="ta-modal-error ta-modal-error--${kind}">
+        <div class="ta-modal-error-icon">${tIcon("alert-circle")}</div>
+        <div class="ta-modal-error-title"></div>
+        <div class="ta-modal-error-msg"></div>
+        <div class="ta-modal-error-actions">
+          ${canRetry ? `<button type="button" class="ta-err-btn ta-err-btn--primary" data-retry>${tIcon("refresh-cw") || ""}<span>Try again</span></button>` : ""}
+          ${needsKey ? `<button type="button" class="ta-err-btn" data-open-settings>Open settings</button>` : ""}
+          <button type="button" class="ta-err-btn" data-copy-err>Copy error</button>
+        </div>
       </div>`;
-    body.querySelector(".ta-modal-error-msg").textContent = error || "Unknown error";
+    body.querySelector(".ta-modal-error-title").textContent = title;
+    body.querySelector(".ta-modal-error-msg").textContent = raw;
+    const retryBtn = body.querySelector("[data-retry]");
+    if (retryBtn) {
+      retryBtn.addEventListener("click", () => {
+        const prompt = this.modalState && this.modalState.lastPrompt;
+        const type = this.modalState && this.modalState.action;
+        if (!prompt) return;
+        this.modalState.text = "";
+        this.modalState.started = false;
+        body.classList.remove("ta-modal-body--error");
+        body.classList.remove("ta-md");
+        body.classList.add("ta-modal-body--center");
+        body.innerHTML = `<span class="ta-loading-dots"><span></span><span></span><span></span></span>`;
+        const stream = this.modal.querySelector(".ta-modal-title");
+        if (stream && !stream.querySelector(".ta-streaming")) {
+          const s = document.createElement("span");
+          s.className = "ta-streaming";
+          s.textContent = "streaming…";
+          stream.appendChild(s);
+        }
+        chrome.runtime.sendMessage({ action: "processText", prompt, type });
+      });
+    }
+    const openSettings = body.querySelector("[data-open-settings]");
+    if (openSettings) {
+      openSettings.addEventListener("click", () => {
+        chrome.runtime.sendMessage({ action: "openOptions" });
+      });
+    }
+    const copyBtn = body.querySelector("[data-copy-err]");
+    if (copyBtn) {
+      copyBtn.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(raw);
+          copyBtn.textContent = "Copied";
+          setTimeout(() => (copyBtn.textContent = "Copy error"), 1200);
+        } catch (e) {
+          console.error("Clipboard failed", e);
+        }
+      });
+    }
     const stream = this.modal.querySelector(".ta-streaming");
     if (stream) stream.remove();
   }
@@ -592,6 +876,23 @@ class TextAid {
         this.handleSelection();
         if (!this.toolbar) this.toastMsg("Select text first");
         break;
+      case "runActionFromShortcut": {
+        const sel = window.getSelection();
+        const text = sel ? sel.toString().trim() : "";
+        if (!text || text.length < 2) {
+          this.toastMsg("Select text first");
+          break;
+        }
+        this.selectionText = text;
+        if (sel.rangeCount > 0) {
+          const r = sel.getRangeAt(0);
+          this.selectionRect = r.getBoundingClientRect();
+          this.selectionRange = r.cloneRange();
+          this.selectionEditable = this.isEditableContext(sel.anchorNode);
+        }
+        this.runAction(msg.runAction);
+        break;
+      }
     }
   }
 }

@@ -11,7 +11,7 @@ const DEFAULTS = {
 };
 
 const DEFAULT_MODELS = {
-  gemini: "gemini-2.0-flash",
+  gemini: "gemini-2.5-flash",
   openai: "gpt-4o-mini",
 };
 
@@ -44,12 +44,29 @@ class TextAidBackground {
     });
     chrome.contextMenus.onClicked.addListener((info, tab) => this.onContextMenu(info, tab));
     if (chrome.commands && chrome.commands.onCommand) {
+      const COMMAND_TO_ACTION = {
+        "summarize-selection": "summarize",
+        "rewrite-selection": "rephrase",
+        "translate-selection": "translate",
+      };
       chrome.commands.onCommand.addListener((command) => {
-        if (command !== "open-toolbar") return;
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
           const tab = tabs && tabs[0];
-          if (!tab) return;
-          chrome.tabs.sendMessage(tab.id, { action: "showToolbarFromShortcut" }).catch(() => {});
+          if (!tab || !tab.id) return;
+          let payload;
+          if (command === "open-toolbar") {
+            payload = { action: "showToolbarFromShortcut" };
+          } else if (COMMAND_TO_ACTION[command]) {
+            payload = { action: "runActionFromShortcut", runAction: COMMAND_TO_ACTION[command] };
+          } else {
+            return;
+          }
+          try {
+            const ret = chrome.tabs.sendMessage(tab.id, payload);
+            if (ret && typeof ret.catch === "function") ret.catch(() => {});
+          } catch (e) {
+            /* ignore */
+          }
         });
       });
     }
@@ -142,6 +159,15 @@ class TextAidBackground {
           await this.saveHistory(message.record);
           sendResponse({ ok: true });
           break;
+        case "openOptions":
+          try {
+            const url = chrome.runtime.getURL("popup.html");
+            chrome.tabs.create({ url });
+          } catch (e) {
+            /* ignore */
+          }
+          sendResponse({ ok: true });
+          break;
         case "getSuggestion":
           if (this.settings.enableSuggestions) {
             const suggestion = await this.getSuggestion(message.text, message.context);
@@ -171,11 +197,68 @@ class TextAidBackground {
     });
   }
 
-  friendlyError(provider, status, raw) {
-    if (status === 401 || status === 403) return "Invalid API key — check settings";
-    if (status === 429) return "Rate limit reached — wait a moment or switch provider";
-    if (status === 0) return `Couldn't reach ${provider}`;
-    return raw || `${provider} request failed (${status})`;
+  friendlyError(provider, status, raw, headers) {
+    let body = null;
+    if (raw && typeof raw === "string") {
+      try { body = JSON.parse(raw); } catch { /* not json */ }
+    }
+    const apiErr = body && body.error ? body.error : null;
+    const apiMsg = apiErr && apiErr.message ? String(apiErr.message) : "";
+    const apiCode = apiErr && (apiErr.code || apiErr.type) ? String(apiErr.code || apiErr.type) : "";
+    const apiStatus = apiErr && apiErr.status ? String(apiErr.status) : "";
+
+    let retryAfter = "";
+    if (headers && typeof headers.get === "function") {
+      const ra = headers.get("retry-after");
+      if (ra) retryAfter = ` (retry in ~${Number(ra) || ra}s)`;
+    }
+
+    if (status === 401 || status === 403 || apiStatus === "PERMISSION_DENIED" || apiCode === "invalid_api_key") {
+      return `Invalid or unauthorized ${provider} API key — check it in settings.`;
+    }
+    if (status === 404 || apiStatus === "NOT_FOUND" || apiCode === "model_not_found") {
+      return `Model not found on ${provider} — pick another model in the popup.`;
+    }
+    if (status === 400 || apiStatus === "INVALID_ARGUMENT") {
+      if (/context.*length|maximum.*tokens|too long/i.test(apiMsg)) {
+        return `Selection too long for this model — shorten the text or pick a model with more context.`;
+      }
+      return apiMsg ? `${provider} rejected the request: ${apiMsg}` : `${provider} request was invalid (400).`;
+    }
+    if (status === 413) {
+      return `Selection too large — shorten the text and retry.`;
+    }
+    if (status === 429 || apiStatus === "RESOURCE_EXHAUSTED" || apiCode === "rate_limit_exceeded") {
+      if (apiCode === "insufficient_quota" || /quota|billing|credit/i.test(apiMsg)) {
+        return `${provider} quota exceeded — add billing or wait for the quota to reset.`;
+      }
+      return `${provider} rate limit reached${retryAfter} — wait a moment, retry, or switch model/provider.`;
+    }
+    if (status === 503 || status === 502 || status === 504 || apiStatus === "UNAVAILABLE") {
+      return `${provider} is temporarily overloaded${retryAfter} — try again in a few seconds, or switch to a lighter model (e.g. Flash / mini).`;
+    }
+    if (status === 500 || apiStatus === "INTERNAL") {
+      return `${provider} hit an internal error — try again, or switch model if it persists.`;
+    }
+    if (status === 0) {
+      return `Couldn't reach ${provider} — check your internet connection or firewall.`;
+    }
+    if (apiMsg) return `${provider}: ${apiMsg}`;
+    return raw || `${provider} request failed (${status}).`;
+  }
+
+  isRetryableStatus(status) {
+    return status === 429 || status === 500 || status === 502 || status === 503 || status === 504;
+  }
+
+  retryDelayMs(attempt, headers) {
+    if (headers && typeof headers.get === "function") {
+      const ra = headers.get("retry-after");
+      const n = Number(ra);
+      if (Number.isFinite(n) && n > 0) return Math.min(n * 1000, 8000);
+    }
+    const base = 600 * Math.pow(2, attempt);
+    return base + Math.floor(Math.random() * 300);
   }
 
   async processWithAI(prompt, type, tabId) {

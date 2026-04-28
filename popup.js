@@ -22,12 +22,22 @@ function icon(name) {
 
 const MODELS = {
   gemini: [
-    { id: "gemini-2.0-flash", label: "Gemini 2.0 Flash" },
-    { id: "gemini-1.5-pro", label: "Gemini 1.5 Pro" },
+    { id: "gemini-2.5-flash", label: "Gemini 2.5 Flash", tier: "free", tag: "Recommended" },
+    { id: "gemini-2.5-flash-lite", label: "Gemini 2.5 Flash-Lite", tier: "free", tag: "Cheapest" },
+    { id: "gemini-3-flash", label: "Gemini 3 Flash", tier: "free", tag: "Latest" },
+    { id: "gemini-2.5-pro", label: "Gemini 2.5 Pro", tier: "paid" },
+    { id: "gemini-3-pro", label: "Gemini 3 Pro", tier: "paid", tag: "Premium" },
+    { id: "gemini-2.0-flash", label: "Gemini 2.0 Flash", tier: "free", tag: "Legacy" },
+    { id: "gemini-1.5-pro", label: "Gemini 1.5 Pro", tier: "paid", tag: "Legacy" },
   ],
   openai: [
-    { id: "gpt-4o-mini", label: "GPT-4o mini" },
-    { id: "gpt-4o", label: "GPT-4o" },
+    { id: "gpt-4o-mini", label: "GPT-4o mini", tier: "paid", tag: "Recommended" },
+    { id: "gpt-4.1-nano", label: "GPT-4.1 nano", tier: "paid", tag: "Cheapest" },
+    { id: "gpt-4.1-mini", label: "GPT-4.1 mini", tier: "paid" },
+    { id: "gpt-5-mini", label: "GPT-5 mini", tier: "paid" },
+    { id: "gpt-4o", label: "GPT-4o", tier: "paid" },
+    { id: "gpt-4.1", label: "GPT-4.1", tier: "paid" },
+    { id: "gpt-5", label: "GPT-5", tier: "paid", tag: "Premium" },
   ],
 };
 
@@ -86,9 +96,15 @@ class CustomSelect {
       li.className = "ta-cs-item" + (opt.id === this.value ? " is-selected" : "");
       li.role = "option";
       li.dataset.value = opt.id;
-      li.innerHTML = `<span>${opt.label}</span>${
-        opt.id === this.value ? `<span class="ta-cs-check">${ICONS["check"]}</span>` : ""
-      }`;
+      const tierBadge = opt.tier
+        ? `<span class="ta-cs-tier ta-cs-tier--${opt.tier}">${opt.tier === "free" ? "Free" : "Paid"}</span>`
+        : "";
+      const tagBadge = opt.tag ? `<span class="ta-cs-tag">${opt.tag}</span>` : "";
+      const check = opt.id === this.value ? `<span class="ta-cs-check">${ICONS["check"]}</span>` : "";
+      li.innerHTML = `
+        <span class="ta-cs-item-label">${opt.label}</span>
+        <span class="ta-cs-item-meta">${tagBadge}${tierBadge}${check}</span>
+      `;
       li.addEventListener("click", (e) => {
         e.stopPropagation();
         this.set(opt.id);
@@ -172,8 +188,23 @@ class Popup {
   }
 
   renderShortcut() {
-    const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.platform);
-    this.$("shortcutHint").textContent = isMac ? "⇧ ⌘ Space" : "Ctrl Shift Space";
+    const el = this.$("shortcutHint");
+    if (!el) return;
+    if (chrome && chrome.commands && chrome.commands.getAll) {
+      chrome.commands.getAll((cmds) => {
+        const open = (cmds || []).find((c) => c.name === "open-toolbar");
+        const sc = open && open.shortcut ? open.shortcut : "";
+        if (sc) {
+          el.textContent = sc.replace(/\+/g, " ");
+        } else {
+          const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.platform);
+          el.textContent = isMac ? "⇧ ⌘ Y" : "Ctrl Shift Y";
+        }
+      });
+    } else {
+      const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.platform);
+      el.textContent = isMac ? "⇧ ⌘ Y" : "Ctrl Shift Y";
+    }
   }
 
   attachEvents() {
