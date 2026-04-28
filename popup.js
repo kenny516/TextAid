@@ -172,8 +172,23 @@ class Popup {
   }
 
   renderShortcut() {
-    const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.platform);
-    this.$("shortcutHint").textContent = isMac ? "⇧ ⌘ Space" : "Ctrl Shift Space";
+    const el = this.$("shortcutHint");
+    if (!el) return;
+    if (chrome && chrome.commands && chrome.commands.getAll) {
+      chrome.commands.getAll((cmds) => {
+        const open = (cmds || []).find((c) => c.name === "open-toolbar");
+        const sc = open && open.shortcut ? open.shortcut : "";
+        if (sc) {
+          el.textContent = sc.replace(/\+/g, " ");
+        } else {
+          const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.platform);
+          el.textContent = isMac ? "⇧ ⌘ Y" : "Ctrl Shift Y";
+        }
+      });
+    } else {
+      const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.platform);
+      el.textContent = isMac ? "⇧ ⌘ Y" : "Ctrl Shift Y";
+    }
   }
 
   attachEvents() {

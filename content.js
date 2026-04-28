@@ -592,6 +592,23 @@ class TextAid {
         this.handleSelection();
         if (!this.toolbar) this.toastMsg("Select text first");
         break;
+      case "runActionFromShortcut": {
+        const sel = window.getSelection();
+        const text = sel ? sel.toString().trim() : "";
+        if (!text || text.length < 2) {
+          this.toastMsg("Select text first");
+          break;
+        }
+        this.selectionText = text;
+        if (sel.rangeCount > 0) {
+          const r = sel.getRangeAt(0);
+          this.selectionRect = r.getBoundingClientRect();
+          this.selectionRange = r.cloneRange();
+          this.selectionEditable = this.isEditableContext(sel.anchorNode);
+        }
+        this.runAction(msg.runAction);
+        break;
+      }
     }
   }
 }

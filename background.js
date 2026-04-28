@@ -44,12 +44,29 @@ class TextAidBackground {
     });
     chrome.contextMenus.onClicked.addListener((info, tab) => this.onContextMenu(info, tab));
     if (chrome.commands && chrome.commands.onCommand) {
+      const COMMAND_TO_ACTION = {
+        "summarize-selection": "summarize",
+        "rewrite-selection": "rephrase",
+        "translate-selection": "translate",
+      };
       chrome.commands.onCommand.addListener((command) => {
-        if (command !== "open-toolbar") return;
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
           const tab = tabs && tabs[0];
-          if (!tab) return;
-          chrome.tabs.sendMessage(tab.id, { action: "showToolbarFromShortcut" }).catch(() => {});
+          if (!tab || !tab.id) return;
+          let payload;
+          if (command === "open-toolbar") {
+            payload = { action: "showToolbarFromShortcut" };
+          } else if (COMMAND_TO_ACTION[command]) {
+            payload = { action: "runActionFromShortcut", runAction: COMMAND_TO_ACTION[command] };
+          } else {
+            return;
+          }
+          try {
+            const ret = chrome.tabs.sendMessage(tab.id, payload);
+            if (ret && typeof ret.catch === "function") ret.catch(() => {});
+          } catch (e) {
+            /* ignore */
+          }
         });
       });
     }
