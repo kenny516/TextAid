@@ -1,178 +1,156 @@
-# TextAid - AI Assistant Chrome Extension
+# TextAid
 
-A versatile AI-powered browser extension that enhances productivity across web-based text interactions. TextAid provides intelligent text summarization, real-time writing suggestions, and contextual content generation for any web page.
+> A minimalist AI writing layer for any web page.
+> Summarize, rewrite, translate and expand any selection — without
+> leaving the tab.
+
+TextAid is a Manifest V3 cross-browser extension. Bring your own
+**OpenAI** or **Google Gemini** key; everything runs locally between
+your browser and the provider you chose. No TextAid server, no proxy,
+no account.
+
+- 🛒 **Stores** — Chrome Web Store, Microsoft Edge Add-ons, Firefox AMO,
+  Opera Add-ons, Mac App Store (Safari).
+  See [`docs/SUPPORTED_BROWSERS.md`](docs/SUPPORTED_BROWSERS.md).
+- 🔐 **Privacy** — see [`PRIVACY.md`](PRIVACY.md).
+- 📜 **Changelog** — see [`CHANGELOG.md`](CHANGELOG.md).
+- 🚀 **Releasing** — see [`RELEASING.md`](RELEASING.md).
 
 ## Features
 
-### 🤖 Multi-AI Provider Support
+- **Summarize** any selection into clean bullet points.
+- **Rewrite** with four tones: professional, casual, creative, concise.
+- **Translate** to 16 languages from a submenu (EN, FR, ES, DE, IT, PT,
+  NL, PL, RU, UK, TR, AR, ZH, JA, KO, HI).
+- **Expand** a sentence into a full paragraph.
+- **Markdown rendering** in the result modal (bold, lists, code blocks,
+  headings, links).
+- **Rich error messages** with actionable hints when a model is
+  rate-limited, out of quota or unavailable.
+- **Direct keyboard shortcuts** — `Alt+Shift+S` summarize,
+  `Alt+Shift+R` rewrite, `Alt+Shift+T` translate,
+  `Ctrl+Shift+Y` (`Cmd+Shift+Y` on macOS) open the toolbar on the
+  current selection.
 
-- **OpenAI GPT-4o-mini**: High-quality responses with pay-per-use model
-- **Google Gemini 1.5-flash**: Free tier with generous quotas (recommended)
-- Easy switching between providers in settings
+## Providers and models
 
-### 🔍 Text Summarization
+Choose your provider in the popup and paste your API key.
 
-- Select any text on a webpage and get instant, concise summaries
-- Bullet-point format for easy reading
-- Context-aware summarization
+| Provider                          | Models                                                                                                                             | Cost                |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| **Google Gemini** _(recommended)_ | `gemini-2.5-flash` (default), `2.5-flash-lite`, `3-flash`, `2.5-pro`, `3-pro` (legacy `2.0-flash`, `1.5-pro` kept for back-compat) | Free tier available |
+| **OpenAI**                        | `gpt-4o-mini`, `gpt-4o`, `gpt-4.1-nano/mini/full`, `gpt-5-mini`, `gpt-5`                                                           | Pay-per-use         |
 
-### ✍️ Real-time Writing Assistance
+Get a key:
 
-- Smart auto-complete suggestions while typing
-- Contextual sentence completion
-- Customizable suggestion frequency (Low/Medium/High)
+- Gemini → <https://aistudio.google.com/app/apikey>
+- OpenAI → <https://platform.openai.com/api-keys>
 
-### 🎯 Context Menu Actions
+## Install
 
-- **Rephrase**: Professional, casual, or concise tone options
-- **Generate Ideas**: Get creative suggestions based on selected text
-- **Expand Text**: Add more detail and context to your content
+### From the stores
 
-### ⚙️ Customizable Settings
+When the extension is published, install from your browser's official store:
 
-- Multiple writing styles: Casual, Professional, Creative, Concise
-- Adjustable suggestion aggressiveness
-- Toggle features on/off as needed
-- Secure API key storage
+- Chrome / Brave / Opera / Arc / Vivaldi → Chrome Web Store
+- Edge → Microsoft Edge Add-ons
+- Firefox / Zen / LibreWolf → addons.mozilla.org
 
-## Installation
+### From source (development)
 
-### From Source
+```bash
+git clone https://github.com/kenny516/TextAid.git
+cd TextAid
+npm install
+npm run build           # builds dist/chrome and dist/firefox
+```
 
-1. Clone or download this repository
-2. Open Chrome and navigate to `chrome://extensions/`
-3. Enable "Developer mode" in the top right
-4. Click "Load unpacked" and select the extension directory
-5. The TextAid icon should appear in your browser toolbar
+Then load the unpacked build:
 
-### Configuration
+- **Chromium** — `chrome://extensions` → enable Developer mode →
+  _Load unpacked_ → select `dist/chrome/`.
+- **Firefox** — `about:debugging#/runtime/this-firefox` →
+  _Load Temporary Add-on_ → select `dist/firefox/manifest.json`.
 
-1. Click the TextAid icon in the toolbar
-2. Enter your OpenAI API key (starts with `sk-`) or your Google Gemini key (starts with `AIza...`)
-3. Configure your preferred settings and AI providers
-4. Save and start using the extension!
+Watch mode for development:
 
-## Usage
+```bash
+npm run dev:chrome      # rebuild dist/chrome on change
+npm run dev:firefox
+```
 
-### Text Summarization
-
-1. Select any text on a webpage
-2. Right-click and choose "TextAid" → "Summarize Selected Text"
-3. Or use the floating toolbar that appears after selection
-
-### Writing Suggestions
-
-1. Click in any text field or textarea
-2. Start typing - suggestions will appear automatically based on your frequency settings
-3. Click "Accept" to use a suggestion or "×" to dismiss
-
-### Context Actions
-
-- **Right-click menu**: Select text → Right-click → TextAid → Choose action
-- **Floating toolbar**: Select text → Click the desired action button
-
-## API Requirements
-
-This extension supports two AI providers:
-
-### 🆓 Google Gemini (Recommended - Free)
-
-1. Visit [Google AI Studio](https://aistudio.google.com/app/apikey)
-2. Sign in with your Google account
-3. Click "Create API Key"
-4. Copy the key (starts with `AIza...`)
-5. **Free tier includes**: 15 requests/minute, 1500 requests/day, 1M tokens/month
-
-### 💳 OpenAI (Pay-per-use)
-
-1. Visit [OpenAI Platform](https://platform.openai.com/)
-2. Sign up or log in to your account
-3. Navigate to API Keys section
-4. Create a new API key (starts with `sk-`)
-5. Add billing information and credits
-
-**Note**: Gemini is recommended for most users due to its generous free tier and excellent performance.
-
-## Privacy & Security
-
-- API keys are stored locally in Chrome's secure storage
-- Text is only sent to OpenAI when you explicitly trigger an action
-- Password fields are automatically excluded from suggestions
-- No tracking or data collection by the extension itself
-
-## Development
-
-### Project Structure
+## Project layout
 
 ```
 TextAid/
-├── manifest.json          # Extension configuration
-├── popup.html            # Settings popup UI
-├── popup.js              # Settings popup logic
-├── background.js         # Service worker & API integration
-├── content.js            # Page interaction & UI injection
-├── content.css           # Styles for injected UI elements
-├── icons/                # Extension icons
-├── plan.md              # Project planning document
-├── agent.md             # Development workflow
-└── README.md            # This file
+├── manifest.json          # MV3 manifest (canonical, used by Chrome)
+├── background.js          # service worker / event page
+├── content.js             # page-injected toolbar + result modal
+├── content.css
+├── popup.html / popup.css / popup.js
+├── icons/
+├── lib/                   # shared helpers (markdown, errors, ...)
+├── scripts/
+│   ├── build.mjs          # cross-browser build → dist/
+│   ├── watch.mjs
+│   └── version.mjs        # bump version across all manifests
+├── landing/               # marketing site (Vite + React)
+├── docs/
+│   ├── SUPPORTED_BROWSERS.md
+│   ├── STORE_LISTING.md   # ready-to-paste store copy
+│   └── development.md
+├── PRIVACY.md
+├── CHANGELOG.md
+├── RELEASING.md
+└── README.md
 ```
 
-### Tech Stack
+## Releasing
 
-- **Extension**: Chrome Manifest V3
-- **Frontend**: Vanilla HTML/CSS/JavaScript
-- **AI**: OpenAI GPT-4o-mini API
-- **Storage**: Chrome Storage API
+See [`RELEASING.md`](RELEASING.md). In short:
 
-### Development Workflow
+```bash
+npm run version:set -- minor    # 1.2.0 → 1.3.0
+# update CHANGELOG.md
+git commit -am "Release 1.3.0" && git tag v1.3.0
+git push --follow-tags
+```
 
-This project follows the "Think, Plan, Code, Verify, Commit" methodology outlined in `agent.md`.
+The `release` workflow then builds and publishes
+`dist/textaid-chrome-X.Y.Z.zip` and `dist/textaid-firefox-X.Y.Z.zip` as
+GitHub Release assets.
+
+To submit those artifacts to the Chrome Web Store, Edge Add-ons and
+Firefox AMO, follow [`docs/STORE_LISTING.md`](docs/STORE_LISTING.md) —
+it contains the descriptions, permission justifications and asset
+checklist already written.
+
+## Privacy
+
+TextAid does not collect, store or transmit any user data to TextAid
+itself. Your API key and preferences live in the browser's local
+extension storage, and your selected text is sent **only** to the AI
+provider you configured, **only** when you explicitly trigger an action.
+Full details in [`PRIVACY.md`](PRIVACY.md).
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feat/new-feature`)
-3. Follow the development workflow in `agent.md`
-4. Commit your changes with descriptive messages
-5. Push to your branch and create a Pull Request
+1. Fork the repository.
+2. Create a feature branch (`git checkout -b feat/<name>`).
+3. Run `npm run dev:chrome` (or `:firefox`) and test the unpacked build.
+4. Update `CHANGELOG.md` under `## [Unreleased]`.
+5. Open a PR with a descriptive title.
 
 ## License
 
-MIT License - see LICENSE file for details.
+MIT — see [`LICENSE`](LICENSE).
 
-## Roadmap
+## Star history
 
-### Phase 1 (Current)
-
-- [x] Basic extension structure
-- [x] Text summarization
-- [x] Context menu integration
-- [x] Real-time typing suggestions
-- [ ] Testing and bug fixes
-
-### Phase 2 (Future)
-
-- [ ] Multi-language support
-- [ ] Site-specific integrations (Google Docs, Gmail)
-- [ ] Voice input support
-- [ ] Advanced AI features
-- [ ] Firefox compatibility
-
-## Support
-
-For issues, feature requests, or questions:
-
-- Create an issue in the GitHub repository
-- Check existing issues for solutions
-- Provide detailed information about your environment and the problem
-
-## Changelog
-
-### v1.0.0 (In Development)
-
-- Initial release
-- Text summarization functionality
-- Real-time typing suggestions
-- Context menu actions
-- Customizable settings panel
+<a href="https://star-history.com/#kenny516/TextAid&Date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=kenny516/TextAid&type=Date&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=kenny516/TextAid&type=Date" />
+    <img alt="Star history of kenny516/TextAid" src="https://api.star-history.com/svg?repos=kenny516/TextAid&type=Date" />
+  </picture>
+</a>

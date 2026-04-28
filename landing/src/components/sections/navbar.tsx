@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "../ui/button";
 import { GitHubStars } from "../github-stars";
+import { ThemeToggle } from "../theme-toggle";
 
 export function Navbar() {
     const location = useLocation();
@@ -64,6 +65,7 @@ export function Navbar() {
 
                 <div className="flex items-center gap-3">
                     <GitHubStars className="hidden sm:inline-flex" />
+                    <ThemeToggle />
                     <Button size="sm" variant="primary" asChild>
                         <a href={onHome ? "#install" : "/#install"}>Install</a>
                     </Button>

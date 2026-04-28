@@ -155,8 +155,8 @@ function ActionLink({
 }: Action & { variant?: "primary" | "ghost" }) {
     const cls =
         variant === "primary"
-            ? "inline-flex h-9 items-center justify-center rounded-md bg-white px-4 text-[0.82rem] font-medium !text-black transition-opacity hover:opacity-90"
-            : "inline-flex h-9 items-center justify-center rounded-md border border-white/[0.12] bg-transparent px-4 text-[0.82rem] font-medium !text-white/85 transition-colors hover:bg-white/[0.05] hover:!text-white";
+            ? "btn-primary-themed inline-flex h-9 items-center justify-center rounded-md px-4 text-[0.82rem] font-medium"
+            : "btn-outline-themed inline-flex h-9 items-center justify-center rounded-md px-4 text-[0.82rem] font-medium";
 
     if (internal) {
         return (
