@@ -157,6 +157,35 @@
 .textaid-dropdown.textaid-root .ta-dd-item:hover {
   background: var(--ta-card-strong);
 }
+.textaid-dropdown.textaid-root .ta-dd-item--sub {
+  justify-content: space-between;
+}
+.textaid-dropdown.textaid-root .ta-dd-item--back {
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+}
+.textaid-dropdown.textaid-root .ta-dd-chev {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+  line-height: 1;
+}
+.textaid-dropdown.textaid-root .ta-dd-chev--back {
+  margin-right: 6px;
+}
+.textaid-dropdown.textaid-root .ta-dd-scroll {
+  max-height: 280px;
+  overflow-y: auto;
+  margin-top: 2px;
+  padding-top: 2px;
+  border-top: 1px solid var(--ta-border);
+}
+.textaid-dropdown.textaid-root .ta-dd-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+.textaid-dropdown.textaid-root .ta-dd-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+}
 
 /* =====================================================
    Modal
@@ -253,11 +282,101 @@
   white-space: pre-wrap;
   flex: 1 1 auto;
 }
+.textaid-modal.textaid-root .ta-modal-body.ta-md {
+  white-space: normal;
+}
+.textaid-modal.textaid-root .ta-md > *:first-child { margin-top: 0; }
+.textaid-modal.textaid-root .ta-md > *:last-child { margin-bottom: 0; }
+.textaid-modal.textaid-root .ta-md p {
+  margin: 0 0 12px;
+}
+.textaid-modal.textaid-root .ta-md h3,
+.textaid-modal.textaid-root .ta-md h4,
+.textaid-modal.textaid-root .ta-md h5,
+.textaid-modal.textaid-root .ta-md h6 {
+  margin: 16px 0 8px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.textaid-modal.textaid-root .ta-md h3 { font-size: 16px; }
+.textaid-modal.textaid-root .ta-md h4 { font-size: 14px; }
+.textaid-modal.textaid-root .ta-md h5,
+.textaid-modal.textaid-root .ta-md h6 { font-size: 13px; color: rgba(255,255,255,0.78); }
+.textaid-modal.textaid-root .ta-md ul,
+.textaid-modal.textaid-root .ta-md ol {
+  margin: 0 0 12px;
+  padding-left: 20px;
+}
+.textaid-modal.textaid-root .ta-md li {
+  margin: 2px 0;
+}
+.textaid-modal.textaid-root .ta-md li > p {
+  margin: 0;
+}
+.textaid-modal.textaid-root .ta-md strong { font-weight: 600; }
+.textaid-modal.textaid-root .ta-md em { font-style: italic; }
+.textaid-modal.textaid-root .ta-md del { opacity: 0.6; }
+.textaid-modal.textaid-root .ta-md a {
+  color: #7dd3fc;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.textaid-modal.textaid-root .ta-md code {
+  font-family: ui-monospace, "SF Mono", Consolas, monospace;
+  font-size: 0.88em;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.textaid-modal.textaid-root .ta-md pre {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.08);
+  overflow-x: auto;
+}
+.textaid-modal.textaid-root .ta-md pre code {
+  display: block;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  font-size: 12.5px;
+  line-height: 1.55;
+  white-space: pre;
+}
+.textaid-modal.textaid-root .ta-md blockquote {
+  margin: 0 0 12px;
+  padding: 6px 12px;
+  border-left: 3px solid rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.78);
+  background: rgba(255,255,255,0.03);
+  border-radius: 0 6px 6px 0;
+}
+.textaid-modal.textaid-root .ta-md hr {
+  border: 0;
+  height: 1px;
+  background: rgba(255,255,255,0.08);
+  margin: 16px 0;
+}
 .textaid-modal.textaid-root .ta-modal-body--center {
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 40px 20px;
+}
+.textaid-modal.textaid-root .ta-modal-body--error {
+  white-space: normal;
+  flex: 0 1 auto;
+  padding: 28px 20px;
+}
+.textaid-modal.textaid-root .ta-modal-body--error * {
+  text-decoration: none;
+}
+.textaid-modal.textaid-root .ta-modal-foot:empty {
+  display: none;
 }
 
 .textaid-modal.textaid-root .ta-loading-dots {
@@ -283,25 +402,94 @@
 }
 
 .textaid-modal.textaid-root .ta-modal-error {
-  color: var(--ta-fg);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 10px;
+  padding: 24px 20px;
+  max-width: 420px;
+  margin: 0 auto;
+  color: var(--ta-fg);
 }
-.textaid-modal.textaid-root .ta-modal-error-title {
-  font-weight: 500;
+.textaid-modal.textaid-root .ta-modal-error-icon {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+  margin-bottom: 4px;
 }
-.textaid-modal.textaid-root .ta-modal-error-title svg {
-  width: 14px;
-  height: 14px;
-  stroke-width: 1.5;
+.textaid-modal.textaid-root .ta-modal-error--error .ta-modal-error-icon {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+}
+.textaid-modal.textaid-root .ta-modal-error--info .ta-modal-error-icon {
+  background: rgba(59, 130, 246, 0.12);
+  color: #60a5fa;
+}
+.textaid-modal.textaid-root .ta-modal-error-icon svg {
+  width: 22px;
+  height: 22px;
+  stroke-width: 1.75;
+}
+.textaid-modal.textaid-root .ta-modal-error-title {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ta-fg);
 }
 .textaid-modal.textaid-root .ta-modal-error-msg {
-  color: var(--ta-soft);
   font-size: 13px;
+  line-height: 1.5;
+  color: var(--ta-soft);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 180px;
+  overflow-y: auto;
+}
+.textaid-modal.textaid-root .ta-modal-error-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 8px;
+}
+.textaid-modal.textaid-root .ta-err-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 14px;
+  border-radius: var(--ta-radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ta-fg);
+  background: var(--ta-card-strong);
+  border: 1px solid var(--ta-border);
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+.textaid-modal.textaid-root .ta-err-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+.textaid-modal.textaid-root .ta-err-btn--primary {
+  background: #fff;
+  color: #0a0a0a;
+  border-color: #fff;
+}
+.textaid-modal.textaid-root .ta-err-btn--primary:hover {
+  background: rgba(255, 255, 255, 0.9);
+}
+.textaid-modal.textaid-root .ta-err-btn svg {
+  width: 13px;
+  height: 13px;
+  stroke-width: 2;
 }
 
 .textaid-modal.textaid-root .ta-modal-foot {
