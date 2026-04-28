@@ -290,6 +290,45 @@ body {
   width: 12px;
   height: 12px;
 }
+.ta-cs-item-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ta-cs-item-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.ta-cs-tag {
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+.ta-cs-tier {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  line-height: 1;
+}
+.ta-cs-tier--free {
+  color: #6ee7a7;
+  background: rgba(110, 231, 167, 0.1);
+  border-color: rgba(110, 231, 167, 0.25);
+}
+.ta-cs-tier--paid {
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.12);
+}
 
 /* Status */
 .ta-status {
