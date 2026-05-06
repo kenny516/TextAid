@@ -55,7 +55,7 @@ export function Navbar() {
                         className={
                             "text-[0.85rem] transition-colors " +
                             (location.pathname.startsWith("/docs")
-                                ? "text-white"
+                                ? "text-[var(--accent)]"
                                 : "text-white/60 hover:text-white")
                         }
                     >

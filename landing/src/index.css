@@ -340,3 +340,23 @@ a { color: inherit; text-decoration: none; }
 .dark-zone * {
   color-scheme: dark;
 }
+
+/* ---------- Accent utility classes ---------- */
+
+/* Subtle hover glow on cards — border sharpens + bg tints with accent */
+.card-hover {
+  transition: border-color 200ms ease, box-shadow 200ms ease, background-color 200ms ease;
+}
+.card-hover:hover {
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent) !important;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 15%, transparent),
+              0 4px 16px color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+/* Accent glow on section headings */
+.glow-accent {
+  color: var(--paper);
+}
+html.light .glow-accent {
+  color: var(--paper);
+}

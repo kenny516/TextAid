@@ -7,7 +7,7 @@ export function Support() {
                 <div className="grid gap-10 md:grid-cols-[1fr_1.2fr] md:gap-16">
                     <div>
                         <span className="eyebrow">Free forever</span>
-                        <h2 className="display-lg mt-3 text-white">
+                        <h2 className="glow-accent display-lg mt-3">
                             Built in the open. <br />
                             Powered by you.
                         </h2>
@@ -62,10 +62,10 @@ function SupportCard({ href, label, sub, cta, icon, primary }: CardProps) {
             target="_blank"
             rel="noreferrer"
             className={
-                "group relative flex flex-col justify-between gap-5 rounded-xl border p-5 transition-colors " +
+                "card-hover group relative flex flex-col justify-between gap-5 rounded-xl border p-5 transition-colors " +
                 (primary
-                    ? "border-white/15 bg-white/[0.04] hover:border-white/30 hover:bg-white/[0.06]"
-                    : "border-white/[0.08] bg-white/[0.015] hover:border-white/20 hover:bg-white/[0.04]")
+                    ? "border-white/15 bg-white/[0.04] hover:bg-white/[0.06]"
+                    : "border-white/[0.08] bg-white/[0.015] hover:bg-white/[0.04]")
             }
         >
             <div className="flex items-start justify-between gap-3">
