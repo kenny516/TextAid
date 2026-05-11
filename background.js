@@ -472,7 +472,11 @@ class TextAidBackground {
     if (!this.settings.apiKey || !text || !text.trim()) return null;
     const provider = this.settings.aiProvider;
     const model = this.modelFor();
-    const prompt = `Complete this ${context || "text"} in a ${this.settings.suggestionStyle} tone. Only provide the completion, no explanation: "${text}"`;
+    const tone = this.settings.suggestionStyle || "professional";
+    // Send only the last 400 chars so very long texts stay focused
+    const tail = text.length > 400 ? text.slice(-400) : text;
+    const systemMsg = "You are an inline writing assistant. Output ONLY the continuation text — no quotes, no explanation, no repetition of what was already written.";
+    const userMsg = `The user is writing in a ${tone} tone and has paused here:\n\n${tail}\n\nContinue with the next 6–12 words that fit naturally. Output only those words.`;
     try {
       if (provider === "openai") {
         const r = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -481,11 +485,11 @@ class TextAidBackground {
           body: JSON.stringify({
             model,
             messages: [
-              { role: "system", content: "You are a writing assistant. Provide brief, contextual completions." },
-              { role: "user", content: prompt },
+              { role: "system", content: systemMsg },
+              { role: "user", content: userMsg },
             ],
-            max_tokens: 50,
-            temperature: 0.7,
+            max_tokens: 40,
+            temperature: 0.5,
           }),
         });
         if (!r.ok) return null;
@@ -497,8 +501,9 @@ class TextAidBackground {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { maxOutputTokens: 50, temperature: 0.7 },
+          system_instruction: { parts: [{ text: systemMsg }] },
+          contents: [{ parts: [{ text: userMsg }] }],
+          generationConfig: { maxOutputTokens: 40, temperature: 0.5 },
         }),
       });
       if (!r.ok) return null;

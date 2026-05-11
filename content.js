@@ -184,8 +184,17 @@ class TextAid {
     this.selectionRect = null;
     this.selectionEditable = false;
     this.selectionRange = null;
+    this.selectionTarget = null;
+    this.selectionStart = 0;
+    this.selectionEnd = 0;
     this.selectionTimer = null;
     this.modalState = null;
+    // Inline suggestion state
+    this.suggestion = null;
+    this.suggestionTimer = null;
+    this.suggestionReqId = 0;
+    this.suggestionText = null;
+    this.suggestionTarget = null;
     this.init();
   }
 
@@ -212,6 +221,7 @@ class TextAid {
       Object.entries(changes).forEach(([k, v]) => {
         if (k in this.settings || ["enableFloatingToolbar", "enableContextMenu", "enableSuggestions", "suggestionStyle"].includes(k)) {
           this.settings[k] = v.newValue;
+          if (k === "enableSuggestions" && !v.newValue) this.hideSuggestion();
         }
       });
     });
@@ -244,6 +254,7 @@ class TextAid {
     );
 
     chrome.runtime.onMessage.addListener((msg) => this.onMessage(msg));
+    this.initSuggestions();
   }
 
   scheduleSelection() {
@@ -256,6 +267,33 @@ class TextAid {
       this.hideToolbar();
       return;
     }
+
+    // --- Fallback: textarea / input selection (not exposed via window.getSelection) ---
+    const active = document.activeElement;
+    if (
+      active &&
+      (active.tagName === "TEXTAREA" ||
+        (active.tagName === "INPUT" && /^(text|email|search|url|tel)$/i.test(active.type || "text"))) &&
+      active.selectionStart !== active.selectionEnd
+    ) {
+      const text = active.value.slice(active.selectionStart, active.selectionEnd).trim();
+      if (text.length >= 4) {
+        const rect = active.getBoundingClientRect();
+        if (rect && (rect.width > 0 || rect.height > 0)) {
+          this.selectionText = text;
+          this.selectionRect = rect;
+          this.selectionRange = null;
+          this.selectionTarget = active;
+          this.selectionStart = active.selectionStart;
+          this.selectionEnd = active.selectionEnd;
+          this.selectionEditable = true;
+          this.showToolbar();
+          return;
+        }
+      }
+    }
+
+    // --- Standard DOM selection (contenteditable, regular text nodes) ---
     const sel = window.getSelection();
     if (!sel || sel.rangeCount === 0) {
       this.hideToolbar();
@@ -279,6 +317,9 @@ class TextAid {
     this.selectionText = text;
     this.selectionRect = rect;
     this.selectionRange = range.cloneRange();
+    this.selectionTarget = null;
+    this.selectionStart = 0;
+    this.selectionEnd = 0;
     this.selectionEditable = this.isEditableContext(anchorNode);
     this.showToolbar();
   }
@@ -589,6 +630,7 @@ class TextAid {
       started: false,
       editable: this.selectionEditable,
       range: this.selectionRange,
+      target: this.selectionTarget,
     };
   }
 
@@ -770,15 +812,19 @@ class TextAid {
   }
 
   replaceSelection(text) {
-    const active = document.activeElement;
-    if (active && (active.tagName === "TEXTAREA" || active.tagName === "INPUT")) {
-      const start = active.selectionStart;
-      const end = active.selectionEnd;
-      const v = active.value;
-      active.value = v.slice(0, start) + text + v.slice(end);
+    // Use the stored target element (textarea/input) if available — document.activeElement
+    // may point at the modal after it opens, not the original field.
+    const target = (this.modalState && this.modalState.target) || null;
+    const el = target || document.activeElement;
+    if (el && (el.tagName === "TEXTAREA" || el.tagName === "INPUT")) {
+      const start = el.selectionStart;
+      const end = el.selectionEnd;
+      const v = el.value;
+      el.value = v.slice(0, start) + text + v.slice(end);
       const pos = start + text.length;
-      active.setSelectionRange(pos, pos);
-      active.dispatchEvent(new Event("input", { bubbles: true }));
+      el.focus();
+      el.setSelectionRange(pos, pos);
+      el.dispatchEvent(new Event("input", { bubbles: true }));
       return;
     }
     if (this.modalState && this.modalState.range) {
@@ -795,14 +841,16 @@ class TextAid {
 
   insertBelow(text) {
     const insertion = "\n\n" + text;
-    const active = document.activeElement;
-    if (active && (active.tagName === "TEXTAREA" || active.tagName === "INPUT")) {
-      const end = active.selectionEnd;
-      const v = active.value;
-      active.value = v.slice(0, end) + insertion + v.slice(end);
+    const target = (this.modalState && this.modalState.target) || null;
+    const el = target || document.activeElement;
+    if (el && (el.tagName === "TEXTAREA" || el.tagName === "INPUT")) {
+      const end = el.selectionEnd;
+      const v = el.value;
+      el.value = v.slice(0, end) + insertion + v.slice(end);
       const pos = end + insertion.length;
-      active.setSelectionRange(pos, pos);
-      active.dispatchEvent(new Event("input", { bubbles: true }));
+      el.focus();
+      el.setSelectionRange(pos, pos);
+      el.dispatchEvent(new Event("input", { bubbles: true }));
       return;
     }
     if (this.modalState && this.modalState.range && this.modalState.editable) {
@@ -831,6 +879,173 @@ class TextAid {
       ts: Date.now(),
     };
     chrome.runtime.sendMessage({ action: "saveHistory", record });
+  }
+
+  // =====================================================
+  // Inline suggestion (ghost completion)
+  // =====================================================
+
+  initSuggestions() {
+    document.addEventListener("input", (e) => this.onSuggestionInput(e), true);
+    document.addEventListener("keydown", (e) => this.onSuggestionKey(e), true);
+    // Use setTimeout(0) so a Tab keydown can fire and accept before we dismiss
+    document.addEventListener("focusout", () => setTimeout(() => this.hideSuggestion(), 0), true);
+    document.addEventListener("scroll", () => this.hideSuggestion(), true);
+  }
+
+  onSuggestionInput(e) {
+    if (!this.settings.enableSuggestions) return;
+    const el = e.target;
+    if (!this.isEditableEl(el)) return;
+
+    clearTimeout(this.suggestionTimer);
+    this.hideSuggestion();
+
+    const text = this.getEditableText(el);
+    // Trigger after 15+ chars; debounce 800ms so the user has clearly paused
+    if (!text || text.trim().length < 15) return;
+
+    this.suggestionTimer = setTimeout(() => this.requestSuggestion(text, el), 800);
+  }
+
+  onSuggestionKey(e) {
+    if (!this.suggestion) return;
+    if (e.key === "Tab") {
+      e.preventDefault();
+      e.stopPropagation();
+      this.acceptSuggestion();
+    } else if (e.key === "Escape") {
+      e.stopPropagation();
+      this.hideSuggestion();
+    }
+  }
+
+  isEditableEl(el) {
+    if (!el) return false;
+    if (el.isContentEditable) return true;
+    if (el.tagName === "TEXTAREA") return true;
+    if (el.tagName === "INPUT" && /^(text|email|search|url|tel)$/i.test(el.type || "text")) return true;
+    return false;
+  }
+
+  getEditableText(el) {
+    if (el.isContentEditable) {
+      // Return only text that is before the caret
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0) {
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        try {
+          range.setEnd(sel.anchorNode, sel.anchorOffset);
+          return range.toString();
+        } catch (_) { /* anchor outside el — fall through */ }
+      }
+      return el.innerText || "";
+    }
+    // For input / textarea: text strictly before the cursor position
+    const pos = typeof el.selectionStart === "number" ? el.selectionStart : el.value.length;
+    return el.value.slice(0, pos);
+  }
+
+  async requestSuggestion(text, targetEl) {
+    const reqId = ++this.suggestionReqId;
+    const context = targetEl && targetEl.tagName === "TEXTAREA" ? "paragraph" : "text";
+    let res;
+    try {
+      res = await chrome.runtime.sendMessage({ action: "getSuggestion", text: text.trimEnd(), context });
+    } catch (e) {
+      return;
+    }
+    // Discard stale responses
+    if (reqId !== this.suggestionReqId) return;
+    let suggestion = res && res.suggestion;
+    if (!suggestion) return;
+
+    // Strip any leading repetition of the last typed word
+    const lastWord = text.trimEnd().split(/\s+/).pop() || "";
+    if (lastWord && suggestion.toLowerCase().startsWith(lastWord.toLowerCase())) {
+      suggestion = suggestion.slice(lastWord.length).replace(/^[\s,]+/, "");
+    }
+    if (!suggestion) return;
+
+    this.suggestionText = suggestion;
+    this.suggestionTarget = targetEl;
+    this.showSuggestion(suggestion, targetEl);
+  }
+
+  showSuggestion(text, targetEl) {
+    this.hideSuggestion();
+    const el = document.createElement("div");
+    el.className = "textaid-suggestion textaid-root";
+    const safe = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    el.setAttribute("title", text);
+    el.innerHTML = `<span class="ta-sug-text">${safe}</span><span class="ta-sug-key">Tab ↵</span>`;
+    document.body.appendChild(el);
+    this.suggestion = el;
+
+    // Position below the target element
+    const rect = targetEl.getBoundingClientRect();
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
+    let top = scrollY + rect.bottom + 6;
+    let left = scrollX + rect.left;
+    const maxLeft = scrollX + window.innerWidth - 372;
+    if (left > maxLeft) left = maxLeft;
+    el.style.top = top + "px";
+    el.style.left = Math.max(scrollX + 8, left) + "px";
+  }
+
+  acceptSuggestion() {
+    const text = this.suggestionText;
+    const target = this.suggestionTarget;
+    this.hideSuggestion();
+    if (!text || !target) return;
+
+    // Prefix a space if the character immediately before the cursor isn't whitespace
+    const needsSpace = (before) => before.length > 0 && !/\s$/.test(before);
+
+    if (target.isContentEditable) {
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0) {
+        const range = sel.getRangeAt(0);
+        range.collapse(false);
+        const before = range.toString(); // empty — collapsed
+        // Get text before caret to check spacing
+        const checkRange = document.createRange();
+        checkRange.selectNodeContents(target);
+        checkRange.setEnd(range.startContainer, range.startOffset);
+        const prefix = needsSpace(checkRange.toString()) ? " " : "";
+        const node = document.createTextNode(prefix + text);
+        range.insertNode(node);
+        range.setStartAfter(node);
+        range.setEndAfter(node);
+        sel.removeAllRanges();
+        sel.addRange(range);
+        target.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    } else {
+      // Insert at cursor position (selectionStart), not selectionEnd
+      const pos = typeof target.selectionStart === "number" ? target.selectionStart : target.value.length;
+      const v = target.value;
+      const before = v.slice(0, pos);
+      const prefix = needsSpace(before) ? " " : "";
+      const insertion = prefix + text;
+      target.value = before + insertion + v.slice(pos);
+      const newPos = pos + insertion.length;
+      target.setSelectionRange(newPos, newPos);
+      target.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+  }
+
+  hideSuggestion() {
+    if (this.suggestion) {
+      this.suggestion.remove();
+      this.suggestion = null;
+    }
+    clearTimeout(this.suggestionTimer);
+    this.suggestionTimer = null;
+    this.suggestionText = null;
+    this.suggestionTarget = null;
   }
 
   toastMsg(message) {
