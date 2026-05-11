@@ -110,11 +110,11 @@ function DownloadCard({
     muted?: boolean;
 }) {
     return (
-        <article className="group flex flex-col rounded-xl border border-white/[0.08] bg-white/[0.02] p-7 transition-colors hover:border-white/[0.15] hover:bg-white/[0.03]">
+        <article className="card-hover group flex flex-col rounded-xl border border-white/[0.08] bg-white/[0.02] p-7 transition-colors hover:bg-white/[0.03]">
             <div className="flex items-start justify-between">
                 <div>
                     <div className="flex items-center gap-2">
-                        <span className="inline-block h-1.5 w-1.5 rounded-full bg-white" />
+                        <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
                         <span className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-muted">
                             {family}
                         </span>

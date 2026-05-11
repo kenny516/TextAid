@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 
 const REPO = "https://github.com/kenny516/TextAid";
 const RELEASES = `${REPO}/releases/latest`;
@@ -483,6 +484,21 @@ export function Docs() {
     }, []);
 
     return (
+        <>
+            <Helmet>
+                <title>TextAid Docs — Setup, Shortcuts & FAQ</title>
+                <meta
+                    name="description"
+                    content="TextAid documentation: how to install the AI writing extension on Chrome, Firefox, Edge and more. Configure your OpenAI or Gemini API key, learn keyboard shortcuts and troubleshoot common issues."
+                />
+                <link rel="canonical" href="https://text-aid.vercel.app/docs" />
+                <meta property="og:url" content="https://text-aid.vercel.app/docs" />
+                <meta property="og:title" content="TextAid Docs — Setup, Shortcuts & FAQ" />
+                <meta
+                    property="og:description"
+                    content="Install TextAid on Chrome, Firefox or Edge. Configure your OpenAI or Gemini API key and start using AI writing tools on any webpage."
+                />
+            </Helmet>
         <div className="px-6 pt-24 pb-32 sm:pt-28">
             <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[220px_1fr]">
                 <aside className="lg:sticky lg:top-24 lg:self-start">
@@ -582,6 +598,7 @@ export function Docs() {
                 </article>
             </div>
         </div>
+        </>
     );
 }
 

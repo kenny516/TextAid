@@ -17,6 +17,7 @@
     "motion": "latest",
     "react": "latest",
     "react-dom": "latest",
+    "react-helmet-async": "^3.0.0",
     "react-router-dom": "latest",
     "tailwind-merge": "latest"
   },
