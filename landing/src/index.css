@@ -28,8 +28,8 @@
   --surface-2: rgba(255, 255, 255, 0.06);
   --selection-bg: rgba(255, 255, 255, 0.15);
   --selection-fg: #fff;
-  --accent: #d97757;
-  --accent-strong: #e58a6e;
+  --accent: rgba(255, 255, 255, 0.75);
+  --accent-strong: rgba(255, 255, 255, 0.9);
   --ink: #0a0a0a;
 }
 
@@ -45,10 +45,10 @@ html.light {
   --hairline-strong: #d4d4d8; /* zinc-300 */
   --surface-1: #ffffff;
   --surface-2: #f4f4f5;
-  --selection-bg: rgba(217, 119, 87, 0.22);
+  --selection-bg: rgba(100, 100, 100, 0.22);
   --selection-fg: #0a0a0a;
-  --accent: #c2410c;
-  --accent-strong: #9a3412;
+  --accent: #27272a;
+  --accent-strong: #18181b;
   --ink: #fafafa;
 }
 
@@ -183,6 +183,23 @@ a { color: inherit; text-decoration: none; }
 .btn-link-themed:hover {
   color: var(--paper);
   text-decoration: underline;
+}
+
+/* ---------- Text links (exclude navbar + CTA buttons) ---------- */
+main a:not(.btn-primary):not(.btn-outline):not(.btn-primary-themed):not(.btn-outline-themed):not(.btn-ghost-themed):not(.btn-link-themed),
+footer a:not(.btn-primary):not(.btn-outline):not(.btn-primary-themed):not(.btn-outline-themed):not(.btn-ghost-themed):not(.btn-link-themed) {
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 1px;
+  text-decoration-color: transparent;
+  transition: color 150ms ease, text-decoration-color 150ms ease;
+}
+
+main a:not(.btn-primary):not(.btn-outline):not(.btn-primary-themed):not(.btn-outline-themed):not(.btn-ghost-themed):not(.btn-link-themed):hover,
+main a:not(.btn-primary):not(.btn-outline):not(.btn-primary-themed):not(.btn-outline-themed):not(.btn-ghost-themed):not(.btn-link-themed):focus-visible,
+footer a:not(.btn-primary):not(.btn-outline):not(.btn-primary-themed):not(.btn-outline-themed):not(.btn-ghost-themed):not(.btn-link-themed):hover,
+footer a:not(.btn-primary):not(.btn-outline):not(.btn-primary-themed):not(.btn-outline-themed):not(.btn-ghost-themed):not(.btn-link-themed):focus-visible {
+  text-decoration-line: underline;
+  text-decoration-color: currentColor;
 }
 
 @keyframes reveal-up {
