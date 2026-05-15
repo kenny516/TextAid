@@ -631,6 +631,8 @@ class TextAid {
       editable: this.selectionEditable,
       range: this.selectionRange,
       target: this.selectionTarget,
+      selStart: this.selectionStart,
+      selEnd: this.selectionEnd,
     };
   }
 
@@ -817,8 +819,8 @@ class TextAid {
     const target = (this.modalState && this.modalState.target) || null;
     const el = target || document.activeElement;
     if (el && (el.tagName === "TEXTAREA" || el.tagName === "INPUT")) {
-      const start = el.selectionStart;
-      const end = el.selectionEnd;
+      const start = target ? this.modalState.selStart : el.selectionStart;
+      const end = target ? this.modalState.selEnd : el.selectionEnd;
       const v = el.value;
       el.value = v.slice(0, start) + text + v.slice(end);
       const pos = start + text.length;
@@ -844,7 +846,7 @@ class TextAid {
     const target = (this.modalState && this.modalState.target) || null;
     const el = target || document.activeElement;
     if (el && (el.tagName === "TEXTAREA" || el.tagName === "INPUT")) {
-      const end = el.selectionEnd;
+      const end = target ? this.modalState.selEnd : el.selectionEnd;
       const v = el.value;
       el.value = v.slice(0, end) + insertion + v.slice(end);
       const pos = end + insertion.length;
