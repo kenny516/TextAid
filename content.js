@@ -893,6 +893,8 @@ class TextAid {
     // Use setTimeout(0) so a Tab keydown can fire and accept before we dismiss
     document.addEventListener("focusout", () => setTimeout(() => this.hideSuggestion(), 0), true);
     document.addEventListener("scroll", () => this.hideSuggestion(), true);
+    // Dismiss when the user clicks (cursor may have moved)
+    document.addEventListener("mousedown", () => this.hideSuggestion(), true);
   }
 
   onSuggestionInput(e) {
@@ -977,24 +979,182 @@ class TextAid {
 
   showSuggestion(text, targetEl) {
     this.hideSuggestion();
-    const el = document.createElement("div");
-    el.className = "textaid-suggestion textaid-root";
-    const safe = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    el.setAttribute("title", text);
-    el.innerHTML = `<span class="ta-sug-text">${safe}</span><span class="ta-sug-key">Tab ↵</span>`;
-    document.body.appendChild(el);
-    this.suggestion = el;
+    if (targetEl.isContentEditable) {
+      this._showContentEditableGhost(text, targetEl);
+    } else {
+      this._showInputGhost(text, targetEl);
+    }
+  }
 
-    // Position below the target element
-    const rect = targetEl.getBoundingClientRect();
+  // Apply all base ghost-span styles via setProperty so host CSS cannot override them.
+  _applyGhostBaseStyles(el) {
+    const s = (prop, val) => el.style.setProperty(prop, val, "important");
+    s("position", "absolute");
+    s("z-index", "2147483646");
+    s("pointer-events", "none");
+    s("user-select", "none");
+    s("-webkit-user-select", "none");
+    s("white-space", "pre");
+    s("overflow", "hidden");
+    s("display", "block");
+    s("color", "rgba(128,128,128,0.55)");
+    s("margin", "0");
+    s("padding", "0");
+    s("border", "none");
+    s("background", "transparent");
+    s("box-shadow", "none");
+    s("text-decoration", "none");
+    s("line-height", "inherit");
+  }
+
+  _makeTabHint() {
+    const hint = document.createElement("span");
+    hint.textContent = "Tab";
+    const s = (prop, val) => hint.style.setProperty(prop, val, "important");
+    s("display", "inline");
+    s("font-family", "ui-monospace, 'SF Mono', Consolas, monospace");
+    s("font-size", "0.75em");
+    s("font-weight", "400");
+    s("opacity", "0.75");
+    s("background", "rgba(128,128,128,0.15)");
+    s("border-radius", "3px");
+    s("padding", "1px 4px");
+    s("margin-left", "6px");
+    s("vertical-align", "baseline");
+    s("color", "rgba(128,128,128,0.65)");
+    s("border", "none");
+    s("text-decoration", "none");
+    return hint;
+  }
+
+  _showContentEditableGhost(text, targetEl) {
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return;
+    const range = sel.getRangeAt(0);
+    if (!range.collapsed) return;
+
+    // Get the pixel rect of the collapsed caret.
+    let rect = range.getBoundingClientRect();
+    let tmpSpan = null;
+    if (!rect || (rect.width === 0 && rect.height === 0)) {
+      // Fallback: insert a temporary zero-width span to measure position.
+      tmpSpan = document.createElement("span");
+      tmpSpan.textContent = "\u200b";
+      const tmpRange = range.cloneRange();
+      tmpRange.insertNode(tmpSpan);
+      rect = tmpSpan.getBoundingClientRect();
+      if (tmpSpan.parentNode) tmpSpan.parentNode.removeChild(tmpSpan);
+      if (!rect || (rect.width === 0 && rect.height === 0)) return;
+    }
+
+    const ghost = document.createElement("span");
+    this._applyGhostBaseStyles(ghost);
+
+    const style = window.getComputedStyle(targetEl);
+    const s = (prop, val) => ghost.style.setProperty(prop, val, "important");
+    s("font-family", style.fontFamily);
+    s("font-size", style.fontSize);
+    s("font-weight", style.fontWeight);
+    s("line-height", style.lineHeight);
+    s("letter-spacing", style.letterSpacing);
+    s("top", (rect.top + window.scrollY) + "px");
+    // Start the ghost text at the right edge of the cursor rect.
+    s("left", (rect.right + window.scrollX) + "px");
+    // Constrain to the viewport right edge with a small margin.
+    s("max-width", (document.documentElement.clientWidth - rect.right - 12) + "px");
+
+    const textSpan = document.createElement("span");
+    textSpan.textContent = text;
+    ghost.appendChild(textSpan);
+    ghost.appendChild(this._makeTabHint());
+
+    document.body.appendChild(ghost);
+    this.suggestion = ghost;
+  }
+
+  // Mirror-div technique: measure where the caret sits inside a textarea/input.
+  _getCaretCoordinates(el, position) {
+    const computed = window.getComputedStyle(el);
+    const div = document.createElement("div");
+
+    [
+      "fontFamily", "fontSize", "fontWeight", "fontStyle", "fontVariant",
+      "letterSpacing", "lineHeight", "textTransform", "wordSpacing",
+      "paddingTop", "paddingRight", "paddingBottom", "paddingLeft",
+      "borderTopWidth", "borderRightWidth", "borderBottomWidth", "borderLeftWidth",
+      "boxSizing", "tabSize",
+    ].forEach((p) => { div.style[p] = computed[p]; });
+
+    div.style.position = "absolute";
+    div.style.top = "-9999px";
+    div.style.left = "-9999px";
+    div.style.visibility = "hidden";
+    div.style.overflow = "auto";
+    div.style.whiteSpace = el.tagName === "INPUT" ? "nowrap" : "pre-wrap";
+    div.style.wordWrap = "break-word";
+    div.style.width = el.offsetWidth + "px";
+    div.style.height = "auto";
+
+    div.textContent = el.value.slice(0, position);
+    const marker = document.createElement("span");
+    marker.textContent = "\u200b"; // zero-width space as a size-less placeholder
+    div.appendChild(marker);
+
+    document.body.appendChild(div);
+    div.scrollTop = el.scrollTop;
+    div.scrollLeft = el.scrollLeft;
+
+    const borderTop = parseInt(computed.borderTopWidth) || 0;
+    const borderLeft = parseInt(computed.borderLeftWidth) || 0;
+    const coords = {
+      top: marker.offsetTop + borderTop,
+      left: marker.offsetLeft + borderLeft,
+      lineHeight: marker.offsetHeight || parseInt(computed.lineHeight) || 20,
+    };
+
+    document.body.removeChild(div);
+    return coords;
+  }
+
+  _showInputGhost(text, el) {
+    const pos = typeof el.selectionStart === "number" ? el.selectionStart : el.value.length;
+    const coords = this._getCaretCoordinates(el, pos);
+    const elRect = el.getBoundingClientRect();
     const scrollX = window.scrollX;
     const scrollY = window.scrollY;
-    let top = scrollY + rect.bottom + 6;
-    let left = scrollX + rect.left;
-    const maxLeft = scrollX + window.innerWidth - 372;
-    if (left > maxLeft) left = maxLeft;
-    el.style.top = top + "px";
-    el.style.left = Math.max(scrollX + 8, left) + "px";
+
+    const top = elRect.top + scrollY + coords.top - el.scrollTop;
+    const left = elRect.left + scrollX + coords.left - el.scrollLeft;
+    const maxWidth = Math.max(0, elRect.right + scrollX - left - 8);
+
+    const ghost = document.createElement("span");
+    this._applyGhostBaseStyles(ghost);
+
+    const style = window.getComputedStyle(el);
+    const s = (prop, val) => ghost.style.setProperty(prop, val, "important");
+    s("font-family", style.fontFamily);
+    s("font-size", style.fontSize);
+    s("font-weight", style.fontWeight);
+    s("line-height", style.lineHeight);
+    s("letter-spacing", style.letterSpacing);
+    s("top", top + "px");
+    s("left", left + "px");
+    s("max-width", maxWidth + "px");
+
+    // Clip to the textarea's visible area so ghost doesn't bleed outside its bounds.
+    const clipTop = Math.max(0, elRect.top + scrollY - top);
+    const clipBottom = Math.max(0, top + coords.lineHeight - (elRect.bottom + scrollY));
+    if (clipTop > 0 || clipBottom > 0) {
+      s("clip-path", `inset(${clipTop}px 0px ${clipBottom}px 0px)`);
+    }
+
+    const textSpan = document.createElement("span");
+    textSpan.textContent = text;
+    ghost.appendChild(textSpan);
+    ghost.appendChild(this._makeTabHint());
+
+    document.body.appendChild(ghost);
+    this.suggestion = ghost;
   }
 
   acceptSuggestion() {

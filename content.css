@@ -557,36 +557,7 @@
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
 }
 
-/* Inline ghost suggestion (gated, default off) */
-.textaid-suggestion.textaid-root {
-  position: absolute;
-  z-index: 2147483647;
-  background: #0a0a0a;
-  border: 1px solid var(--ta-border);
-  border-radius: var(--ta-radius-sm);
-  padding: 6px 10px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  color: var(--ta-soft);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-  max-width: 360px;
-}
-.textaid-suggestion.textaid-root .ta-sug-text {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.textaid-suggestion.textaid-root .ta-sug-key {
-  font-family: ui-monospace, "SF Mono", Consolas, monospace;
-  font-size: 10px;
-  background: var(--ta-card);
-  border: 1px solid var(--ta-border);
-  padding: 1px 5px;
-  border-radius: 4px;
-  color: var(--ta-muted);
-}
+/* Inline ghost suggestion — VS Code style (all dynamic styles set via JS inline) */
 
 /* Toast */
 .textaid-toast.textaid-root {
