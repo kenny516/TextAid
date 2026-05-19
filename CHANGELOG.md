@@ -8,6 +8,13 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 
 ### Added
+- **Inline suggestions (ghost completions):** when the toggle is enabled in the
+  popup, TextAid listens for typing in any editable field (`input`, `textarea`,
+  `contenteditable`). After 20+ characters and a 600 ms pause at a word
+  boundary, it fetches a short AI completion and displays a dismissible widget
+  below the field. Press **Tab** to accept and insert the suggestion, or
+  **Escape** to dismiss it. Turning the toggle off immediately hides any
+  pending widget.
 - Three new keyboard shortcuts for direct actions on the current selection:
   `Alt+Shift+S` (Summarize), `Alt+Shift+R` (Rewrite), `Alt+Shift+T`
   (Translate to English).

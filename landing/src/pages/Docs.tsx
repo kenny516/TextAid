@@ -670,7 +670,7 @@ function Callout({
     const styles = {
         muted: "border-white/[0.08] bg-white/[0.02] text-soft",
         info: "border-white/[0.12] bg-white/[0.03] text-white/80",
-        warn: "border-amber-300/20 bg-amber-200/[0.04] text-amber-100/85",
+        warn: "border-amber-500/30 bg-amber-500/10 text-amber-200",
     }[tone];
     return (
         <div className={"mt-6 rounded-lg border p-4 text-[0.88rem] leading-[1.6] " + styles}>
