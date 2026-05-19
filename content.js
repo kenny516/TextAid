@@ -972,13 +972,13 @@ class TextAid {
     }
     if (!suggestion) return;
 
-    this.suggestionText = suggestion;
-    this.suggestionTarget = targetEl;
     this.showSuggestion(suggestion, targetEl);
   }
 
   showSuggestion(text, targetEl) {
     this.hideSuggestion();
+    this.suggestionText = text;
+    this.suggestionTarget = targetEl;
     if (targetEl.isContentEditable) {
       this._showContentEditableGhost(text, targetEl);
     } else {
