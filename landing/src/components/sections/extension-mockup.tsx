@@ -43,6 +43,16 @@ export function ExtensionMockup() {
                     with you.
                 </p>
 
+                {/* Inline ghost text demo */}
+                <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-4 py-3 font-mono text-[0.85rem] leading-relaxed">
+                    <span className="text-white/80">AI is reshaping how we think about</span>
+                    <span className="text-white/30 select-none"> creativity and collaboration —</span>
+                    <span className="inline-flex items-center gap-1.5 ml-1">
+                        <span className="rounded border border-white/[0.12] bg-white/[0.04] px-1 py-px text-[0.65rem] font-sans text-white/40 tracking-wide">Tab</span>
+                        <span className="text-[0.65rem] font-sans text-white/25 tracking-wide">to accept</span>
+                    </span>
+                </div>
+
                 <p className="text-[0.98rem] leading-[1.75] text-white/45 sm:text-[1.05rem]">
                     The page is no longer blank.
                 </p>
