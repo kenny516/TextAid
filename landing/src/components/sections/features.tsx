@@ -26,7 +26,7 @@ const items = [
     {
         icon: Zap,
         title: "Inline auto-complete",
-        body: "Quiet, contextual suggestions as you type. Adjust aggressiveness in one click.",
+        body: "Ghost text appears as you type. Press Tab to accept, Esc to dismiss. Toggle aggressiveness in one click.",
     },
     {
         icon: MousePointer2,

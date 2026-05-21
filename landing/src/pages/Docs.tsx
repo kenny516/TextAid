@@ -253,7 +253,8 @@ const SECTIONS: Section[] = [
                         [<Kbd>Alt ⇧ S</Kbd>, "Summarize the current selection directly"],
                         [<Kbd>Alt ⇧ R</Kbd>, "Rewrite the current selection directly"],
                         [<Kbd>Alt ⇧ T</Kbd>, "Translate the current selection to English"],
-                        [<Kbd>Esc</Kbd>, "Close the result modal or any dropdown"],
+                        [<Kbd>Tab</Kbd>, "Accept an inline ghost-text suggestion"],
+                        [<Kbd>Esc</Kbd>, "Dismiss a ghost-text suggestion, close the result modal, or close any dropdown"],
                         [<Kbd>⌘ Enter</Kbd>, "Submit a custom prompt"],
                         [<Kbd>↑ ↓</Kbd>, "Navigate model / tone dropdowns"],
                     ]}

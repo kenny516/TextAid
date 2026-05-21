@@ -9,7 +9,7 @@ export function Hero() {
             className="px-6 pt-32 pb-20 sm:pt-40"
         >
             <div className="mx-auto max-w-5xl text-center">
-                <span className="eyebrow">v1.2.0 · Free, open source</span>
+                <span className="eyebrow">v1.3.0 · Free, open source</span>
 
                 <div className="mt-6">
                     <SplitText
