@@ -107,7 +107,7 @@ body {
 .ta-segmented {
   position: relative;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -134,7 +134,7 @@ body {
   position: absolute;
   top: 3px;
   left: 3px;
-  width: calc(50% - 3px);
+  width: calc(100% / 3 - 2px);
   height: calc(100% - 6px);
   background: var(--accent);
   border-radius: 5px;
@@ -143,6 +143,9 @@ body {
 }
 .ta-segmented[data-active="openai"] .ta-seg-indicator {
   transform: translateX(100%);
+}
+.ta-segmented[data-active="claude"] .ta-seg-indicator {
+  transform: translateX(200%);
 }
 
 /* Inputs */
@@ -220,6 +223,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
   cursor: pointer;
   transition: border-color var(--t), background var(--t);
   text-align: left;
@@ -269,6 +273,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 6px;
   padding: 8px 10px;
   font-size: 13px;
   color: var(--fg);
@@ -296,6 +301,23 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.ta-cs-item-left {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  flex: 1;
+}
+.ta-cs-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  border-radius: 3px;
+  object-fit: contain;
+}
+.ta-cs-icon--invert {
+  filter: brightness(0) invert(1);
 }
 .ta-cs-item-meta {
   display: inline-flex;

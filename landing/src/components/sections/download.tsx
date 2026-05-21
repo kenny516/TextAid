@@ -32,7 +32,7 @@ export function Download() {
                             "Enable Developer mode (top right)",
                             "Click Load unpacked → select the folder",
                         ]}
-                        icon={<ChromiumGlyph />}
+                        icon={<BrowserStack icons={["chrome", "brave", "edge", "opera"]} />}
                     />
                     <DownloadCard
                         family="Gecko"
@@ -45,7 +45,7 @@ export function Download() {
                             "Click Load Temporary Add-on…",
                             "Select the manifest.json inside",
                         ]}
-                        icon={<FirefoxGlyph />}
+                        icon={<BrowserStack icons={["firefox", "zen-browser", "librewolf"]} />}
                     />
                 </div>
 
@@ -60,7 +60,7 @@ export function Download() {
                             "Wrap with safari-web-extension-converter",
                             "Sign with your Apple Developer account",
                         ]}
-                        icon={<SafariGlyph />}
+                        icon={<BrowserStack icons={["safari"]} />}
                         muted
                     />
                     <DownloadCard
@@ -74,7 +74,7 @@ export function Download() {
                             "npm run build → dist/chrome/, dist/firefox/",
                             "Or npm run dev for watch mode",
                         ]}
-                        icon={<TerminalGlyph />}
+                        icon={<BrowserStack icons={["github"]} invert />}
                         muted
                     />
                 </div>
@@ -172,37 +172,19 @@ function ActionLink({
     );
 }
 
-/* ── Glyphs ─────────────────────────────────────────────── */
+/* ── Browser icon stack ─────────────────────────────────── */
 
-function ChromiumGlyph() {
+function BrowserStack({ icons, invert }: { icons: string[]; invert?: boolean }) {
     return (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-            <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.4" />
-            <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.4" />
-            <path d="M12 9V3M9.5 13.5L4.5 8.5M14.5 13.5l5 -5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-        </svg>
-    );
-}
-function FirefoxGlyph() {
-    return (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-            <path d="M4 13a8 8 0 1 0 14-5 4.5 4.5 0 0 1-3 6 5 5 0 0 0-7-7 5 5 0 0 0-4 6Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
-        </svg>
-    );
-}
-function SafariGlyph() {
-    return (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-            <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.4" />
-            <path d="M15.5 8.5l-2 5-5 2 2-5 5-2Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
-        </svg>
-    );
-}
-function TerminalGlyph() {
-    return (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-            <rect x="3" y="5" width="18" height="14" rx="1.5" stroke="currentColor" strokeWidth="1.4" />
-            <path d="M7 10l3 2-3 2M12 14h5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+        <div className="flex -space-x-1.5">
+            {icons.map((name) => (
+                <img
+                    key={name}
+                    src={`/icons/${name}.svg`}
+                    alt={name}
+                    className={"h-7 w-7 rounded-lg object-contain ring-1 ring-white/10" + (invert ? " invert opacity-60" : "")}
+                />
+            ))}
+        </div>
     );
 }

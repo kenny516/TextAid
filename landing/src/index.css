@@ -377,3 +377,9 @@ footer a:not(.btn-primary):not(.btn-outline):not(.btn-primary-themed):not(.btn-o
 html.light .glow-accent {
   color: var(--paper);
 }
+
+/* ----- Icon adaptive invert: dark icons are already visible in light mode ----- */
+html.light img.invert {
+  filter: none !important;
+  opacity: 0.75;
+}

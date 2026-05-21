@@ -11,11 +11,15 @@
     "dev:chrome": "node scripts/watch.mjs chrome",
     "dev:firefox": "node scripts/watch.mjs firefox",
     "version:set": "node scripts/version.mjs",
-    "test": "echo \"Tests will be added in Phase 3\"",
-    "lint": "echo \"Linting configuration ready\""
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "biome check lib/ tests/",
+    "lint:fix": "biome check --write lib/ tests/"
   },
   "devDependencies": {
-    "adm-zip": "^0.5.16"
+    "@biomejs/biome": "^2.4.15",
+    "adm-zip": "^0.5.16",
+    "vitest": "^4.1.7"
   },
   "keywords": [
     "browser-extension",

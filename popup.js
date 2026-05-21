@@ -20,6 +20,12 @@ function icon(name) {
   return ICONS[name] || "";
 }
 
+const PROVIDER_OPTIONS = [
+  { id: "gemini", label: "Gemini", tag: "Free tier", icon: "icons/google-gemini.svg" },
+  { id: "openai", label: "OpenAI", tag: "Pay per use", icon: "icons/openai.svg", iconClass: "ta-cs-icon--invert" },
+  { id: "claude", label: "Claude", tag: "Pay per use", icon: "icons/anthropic.svg" },
+];
+
 const MODELS = {
   gemini: [
     { id: "gemini-2.5-flash", label: "Gemini 2.5 Flash", tier: "free", tag: "Recommended" },
@@ -39,16 +45,23 @@ const MODELS = {
     { id: "gpt-4.1", label: "GPT-4.1", tier: "paid" },
     { id: "gpt-5", label: "GPT-5", tier: "paid", tag: "Premium" },
   ],
+  claude: [
+    { id: "claude-haiku-4-5", label: "Claude Haiku 4.5", tier: "paid", tag: "Cheapest" },
+    { id: "claude-sonnet-4-6", label: "Claude Sonnet 4.6", tier: "paid", tag: "Recommended" },
+    { id: "claude-opus-4-7", label: "Claude Opus 4.7", tier: "paid", tag: "Premium" },
+  ],
 };
 
 const KEY_PATTERNS = {
   openai: /^sk-/,
   gemini: /^AIza/,
+  claude: /^sk-ant-/,
 };
 
 const KEY_PLACEHOLDERS = {
   openai: "sk-...",
   gemini: "AIza...",
+  claude: "sk-ant-...",
 };
 
 const TONE_OPTIONS = [
@@ -69,11 +82,18 @@ class CustomSelect {
     this.bindOutside();
   }
 
+  _iconHtml(opt) {
+    if (!opt?.icon) return "";
+    const cls = opt.iconClass ? ` ${opt.iconClass}` : "";
+    return `<img src="${opt.icon}" class="ta-cs-icon${cls}" alt="" aria-hidden="true">`;
+  }
+
   render() {
     const current = this.options.find((o) => o.id === this.value) || this.options[0];
     this.value = current.id;
     this.root.innerHTML = `
       <button type="button" class="ta-cs-trigger" aria-haspopup="listbox" aria-expanded="false">
+        ${this._iconHtml(current)}
         <span class="ta-cs-label">${current.label}</span>
         <span class="ta-cs-chev" aria-hidden="true">${ICONS["chevron-down"]}</span>
       </button>
@@ -102,7 +122,10 @@ class CustomSelect {
       const tagBadge = opt.tag ? `<span class="ta-cs-tag">${opt.tag}</span>` : "";
       const check = opt.id === this.value ? `<span class="ta-cs-check">${ICONS["check"]}</span>` : "";
       li.innerHTML = `
-        <span class="ta-cs-item-label">${opt.label}</span>
+        <span class="ta-cs-item-left">
+          ${this._iconHtml(opt)}
+          <span class="ta-cs-item-label">${opt.label}</span>
+        </span>
         <span class="ta-cs-item-meta">${tagBadge}${tierBadge}${check}</span>
       `;
       li.addEventListener("click", (e) => {
@@ -125,7 +148,9 @@ class CustomSelect {
   set(id) {
     if (this.value === id) return;
     this.value = id;
-    this.label.textContent = this.options.find((o) => o.id === id)?.label || id;
+    const opt = this.options.find((o) => o.id === id) || this.options[0];
+    this.trigger.innerHTML = `${this._iconHtml(opt)}<span class="ta-cs-label">${opt?.label || id}</span><span class="ta-cs-chev" aria-hidden="true">${ICONS["chevron-down"]}</span>`;
+    this.label = this.trigger.querySelector(".ta-cs-label");
     this.renderMenu();
     this.onChange?.(id);
   }
@@ -208,9 +233,12 @@ class Popup {
   }
 
   attachEvents() {
-    document.querySelectorAll(".ta-seg").forEach((btn) => {
-      btn.addEventListener("click", () => this.selectProvider(btn.dataset.provider));
-    });
+    this.providerSelect = new CustomSelect(
+      this.$("providerSelect"),
+      PROVIDER_OPTIONS,
+      "gemini",
+      (id) => this.selectProvider(id)
+    );
     this.$("apiKey").addEventListener("input", () => this.validateKey());
     this.$("testKey").addEventListener("click", () => this.testKey());
     this.$("saveSettings").addEventListener("click", () => this.save());
@@ -220,11 +248,8 @@ class Popup {
 
   selectProvider(provider) {
     this.provider = provider;
-    document.querySelector(".ta-segmented").dataset.active = provider;
-    document.querySelectorAll(".ta-seg").forEach((b) => {
-      b.setAttribute("aria-selected", String(b.dataset.provider === provider));
-    });
-    this.$("apiKey").placeholder = KEY_PLACEHOLDERS[provider];
+    if (this.providerSelect) this.providerSelect.set(provider);
+    this.$("apiKey").placeholder = KEY_PLACEHOLDERS[provider] || "";
     this.populateModels(provider);
     this.validateKey();
   }
