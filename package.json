@@ -1,6 +1,6 @@
 {
   "name": "textaid-extension",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Cross-browser AI writing assistant (Chrome, Firefox, Brave, Edge, Opera, Arc, Vivaldi, Zen, Safari)",
   "type": "module",
   "scripts": {
@@ -30,4 +30,3 @@
   "author": "TextAid Team",
   "license": "MIT"
 }
-
