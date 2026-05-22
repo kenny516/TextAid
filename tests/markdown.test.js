@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { taEscapeHtml, taSafeUrl, taRenderInline, taRenderMarkdown } from "../lib/markdown.js";
+import { describe, expect, it } from "vitest";
+import { taEscapeHtml, taRenderInline, taRenderMarkdown, taSafeUrl } from "../lib/markdown.js";
 
 // ─── taEscapeHtml ────────────────────────────────────────────────────────────
 
@@ -9,9 +9,7 @@ describe("taEscapeHtml", () => {
   });
 
   it("escapes angle brackets", () => {
-    expect(taEscapeHtml("<script>alert(1)</script>")).toBe(
-      "&lt;script&gt;alert(1)&lt;/script&gt;",
-    );
+    expect(taEscapeHtml("<script>alert(1)</script>")).toBe("&lt;script&gt;alert(1)&lt;/script&gt;");
   });
 
   it("escapes double quotes", () => {
