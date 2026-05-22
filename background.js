@@ -31,6 +31,7 @@ const ACTION_LIMITS = {
 class TextAidBackground {
   constructor() {
     this.settings = { ...DEFAULTS };
+    this.abortController = null;
     this.init();
   }
 
@@ -169,6 +170,10 @@ class TextAidBackground {
           }
           sendResponse({ ok: true });
           break;
+        case "cancelStream":
+          this.abortController?.abort();
+          sendResponse({ ok: true });
+          break;
         case "getSuggestion":
           if (this.settings.enableSuggestions) {
             const suggestion = await this.getSuggestion(message.text, message.context);
@@ -292,15 +297,21 @@ class TextAidBackground {
     const provider = this.settings.aiProvider;
     const model = this.modelFor();
     const maxTokens = ACTION_LIMITS[type] || 600;
+    this.abortController = new AbortController();
+    const { signal } = this.abortController;
     try {
       if (provider === "openai") {
-        await this.streamOpenAI(prompt, type, tabId, model, maxTokens);
+        await this.streamOpenAI(prompt, type, tabId, model, maxTokens, signal);
       } else if (provider === "claude") {
-        await this.streamClaude(prompt, type, tabId, model, maxTokens);
+        await this.streamClaude(prompt, type, tabId, model, maxTokens, signal);
       } else {
-        await this.streamGemini(prompt, type, tabId, model, maxTokens);
+        await this.streamGemini(prompt, type, tabId, model, maxTokens, signal);
       }
     } catch (e) {
+      if (e.name === "AbortError") {
+        chrome.tabs.sendMessage(tabId, { action: "streamDone" }).catch(() => {});
+        return;
+      }
       console.error("AI processing failed", e);
       try {
         const fallback = await this.bufferedFallback(provider, prompt, type, model, maxTokens);
@@ -313,7 +324,7 @@ class TextAidBackground {
     }
   }
 
-  async streamOpenAI(prompt, type, tabId, model, maxTokens) {
+  async streamOpenAI(prompt, type, tabId, model, maxTokens, signal) {
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -330,6 +341,7 @@ class TextAidBackground {
         max_tokens: maxTokens,
         temperature: type === "ideas" || type === "creative" ? 0.8 : 0.4,
       }),
+      signal,
     });
     if (!res.ok || !res.body) {
       const txt = await res.text().catch(() => "");
@@ -345,10 +357,10 @@ class TextAidBackground {
       } catch {
         return "";
       }
-    });
+    }, signal);
   }
 
-  async streamGemini(prompt, type, tabId, model, maxTokens) {
+  async streamGemini(prompt, type, tabId, model, maxTokens, signal) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:streamGenerateContent?alt=sse&key=${encodeURIComponent(this.settings.apiKey)}`;
     const res = await fetch(url, {
       method: "POST",
@@ -360,6 +372,7 @@ class TextAidBackground {
           temperature: type === "ideas" || type === "creative" ? 0.8 : 0.4,
         },
       }),
+      signal,
     });
     if (!res.ok || !res.body) {
       const txt = await res.text().catch(() => "");
@@ -375,10 +388,10 @@ class TextAidBackground {
       } catch {
         return "";
       }
-    });
+    }, signal);
   }
 
-  async streamClaude(prompt, type, tabId, model, maxTokens) {
+  async streamClaude(prompt, type, tabId, model, maxTokens, signal) {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -394,6 +407,7 @@ class TextAidBackground {
         messages: [{ role: "user", content: prompt }],
         temperature: type === "ideas" || type === "creative" ? 0.8 : 0.4,
       }),
+      signal,
     });
     if (!res.ok || !res.body) {
       const txt = await res.text().catch(() => "");
@@ -412,10 +426,10 @@ class TextAidBackground {
       } catch {
         return "";
       }
-    });
+    }, signal);
   }
 
-  async consumeSSE(body, tabId, parseData) {
+  async consumeSSE(body, tabId, parseData, signal) {
     const reader = body.getReader();
     const decoder = new TextDecoder("utf-8");
     let buffer = "";
