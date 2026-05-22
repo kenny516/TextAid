@@ -1,12 +1,12 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
-  "organizeImports": { "enabled": true },
+  "$schema": "https://biomejs.dev/schemas/2.4.15/schema.json",
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "linter": {
     "enabled": true,
     "rules": {
       "recommended": true,
       "suspicious": {
-        "noConsoleLog": "off"
+        "noConsole": { "level": "off", "options": { "allow": ["log"] } }
       },
       "style": {
         "noNonNullAssertion": "off"
@@ -23,17 +23,18 @@
     "globals": ["chrome", "describe", "it", "expect", "test"]
   },
   "files": {
-    "ignore": [
-      "dist/**",
-      "landing/**",
-      "node_modules/**",
-      "debug-test.html",
-      "debug-textaid.js",
-      "test-design.html",
-      "content.js",
-      "background.js",
-      "popup.js",
-      "scripts/**"
+    "includes": [
+      "**",
+      "!**/dist/**",
+      "!**/landing/**",
+      "!**/node_modules/**",
+      "!**/debug-test.html",
+      "!**/debug-textaid.js",
+      "!**/test-design.html",
+      "!**/content.js",
+      "!**/background.js",
+      "!**/popup.js",
+      "!**/scripts/**"
     ]
   }
 }
