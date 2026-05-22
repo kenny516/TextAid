@@ -13,6 +13,7 @@ const DEFAULTS = {
 const DEFAULT_MODELS = {
   gemini: "gemini-2.5-flash",
   openai: "gpt-4o-mini",
+  claude: "claude-haiku-4-5",
 };
 
 const ACTION_LIMITS = {
@@ -213,6 +214,28 @@ class TextAidBackground {
       if (ra) retryAfter = ` (retry in ~${Number(ra) || ra}s)`;
     }
 
+    // Claude-specific error types (apiErr.type for Anthropic)
+    if (provider === "Claude") {
+      if (status === 401 || apiCode === "authentication_error") {
+        return `Invalid Claude API key — check it in settings (must start with sk-ant-).`;
+      }
+      if (status === 403 || apiCode === "permission_error") {
+        return `Claude API key does not have permission to use this model.`;
+      }
+      if (status === 404 || apiCode === "not_found_error") {
+        return `Claude model not found — pick another model in the popup.`;
+      }
+      if (status === 429 || apiCode === "rate_limit_error") {
+        return `Claude rate limit reached${retryAfter} — wait a moment and retry.`;
+      }
+      if (status === 529 || status === 503 || apiCode === "overloaded_error") {
+        return `Claude is temporarily overloaded${retryAfter} — try again in a few seconds or switch to Haiku.`;
+      }
+      if (status === 400 || apiCode === "invalid_request_error") {
+        return apiMsg ? `Claude rejected the request: ${apiMsg}` : `Claude request was invalid (400).`;
+      }
+    }
+
     if (status === 401 || status === 403 || apiStatus === "PERMISSION_DENIED" || apiCode === "invalid_api_key") {
       return `Invalid or unauthorized ${provider} API key — check it in settings.`;
     }
@@ -272,6 +295,8 @@ class TextAidBackground {
     try {
       if (provider === "openai") {
         await this.streamOpenAI(prompt, type, tabId, model, maxTokens);
+      } else if (provider === "claude") {
+        await this.streamClaude(prompt, type, tabId, model, maxTokens);
       } else {
         await this.streamGemini(prompt, type, tabId, model, maxTokens);
       }
@@ -353,6 +378,43 @@ class TextAidBackground {
     });
   }
 
+  async streamClaude(prompt, type, tabId, model, maxTokens) {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": this.settings.apiKey,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify({
+        model,
+        stream: true,
+        max_tokens: maxTokens,
+        system: `You are a helpful writing assistant. Be ${this.settings.suggestionStyle} in your responses.`,
+        messages: [{ role: "user", content: prompt }],
+        temperature: type === "ideas" || type === "creative" ? 0.8 : 0.4,
+      }),
+    });
+    if (!res.ok || !res.body) {
+      const txt = await res.text().catch(() => "");
+      const err = new Error(this.friendlyError("Claude", res.status, txt));
+      err.friendly = err.message;
+      throw err;
+    }
+    await this.consumeSSE(res.body, tabId, (data) => {
+      try {
+        const j = JSON.parse(data);
+        if (j.type === "message_stop") return null;
+        if (j.type === "content_block_delta" && j.delta?.type === "text_delta") {
+          return j.delta.text || "";
+        }
+        return "";
+      } catch {
+        return "";
+      }
+    });
+  }
+
   async consumeSSE(body, tabId, parseData) {
     const reader = body.getReader();
     const decoder = new TextDecoder("utf-8");
@@ -409,6 +471,31 @@ class TextAidBackground {
       const j = await r.json();
       return j.choices?.[0]?.message?.content?.trim() || "";
     }
+    if (provider === "claude") {
+      const r = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": this.settings.apiKey,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({
+          model,
+          max_tokens: maxTokens,
+          system: `You are a helpful writing assistant. Be ${this.settings.suggestionStyle} in your responses.`,
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.4,
+        }),
+      });
+      if (!r.ok) {
+        const txt = await r.text().catch(() => "");
+        const e = new Error(this.friendlyError("Claude", r.status, txt));
+        e.friendly = e.message;
+        throw e;
+      }
+      const j = await r.json();
+      return j.content?.[0]?.text?.trim() || "";
+    }
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(this.settings.apiKey)}`;
     const r = await fetch(url, {
       method: "POST",
@@ -445,6 +532,25 @@ class TextAidBackground {
         if (!r.ok) {
           const txt = await r.text().catch(() => "");
           return { ok: false, error: this.friendlyError("OpenAI", r.status, txt) };
+        }
+        return { ok: true };
+      } else if (provider === "claude") {
+        const r = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": apiKey,
+            "anthropic-version": "2023-06-01",
+          },
+          body: JSON.stringify({
+            model: useModel,
+            max_tokens: 1,
+            messages: [{ role: "user", content: "ping" }],
+          }),
+        });
+        if (!r.ok) {
+          const txt = await r.text().catch(() => "");
+          return { ok: false, error: this.friendlyError("Claude", r.status, txt) };
         }
         return { ok: true };
       } else {
@@ -495,6 +601,26 @@ class TextAidBackground {
         if (!r.ok) return null;
         const j = await r.json();
         return j.choices?.[0]?.message?.content?.trim() || null;
+      }
+      if (provider === "claude") {
+        const r = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": this.settings.apiKey,
+            "anthropic-version": "2023-06-01",
+          },
+          body: JSON.stringify({
+            model,
+            max_tokens: 40,
+            system: systemMsg,
+            messages: [{ role: "user", content: userMsg }],
+            temperature: 0.5,
+          }),
+        });
+        if (!r.ok) return null;
+        const j = await r.json();
+        return j.content?.[0]?.text?.trim() || null;
       }
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(this.settings.apiKey)}`;
       const r = await fetch(url, {

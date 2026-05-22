@@ -64,6 +64,15 @@ export function Navbar() {
                 </nav>
 
                 <div className="flex items-center gap-3">
+                    <a
+                        href="https://github.com/kenny516/TextAid"
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label="GitHub repository"
+                        className="hidden sm:inline-flex h-7 w-7 items-center justify-center rounded-md text-white/50 transition-colors hover:text-white"
+                    >
+                        <img src="/icons/github.svg" alt="" aria-hidden className="h-4 w-4 invert opacity-60 hover:opacity-100 transition-opacity" />
+                    </a>
                     <GitHubStars className="hidden sm:inline-flex" />
                     <ThemeToggle />
                     <Button size="sm" variant="primary" asChild>

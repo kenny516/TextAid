@@ -5,7 +5,7 @@ export function Providers() {
                 <div className="mb-12 max-w-xl">
                     <span className="eyebrow">Bring your own intelligence</span>
                     <h2 className="display-lg mt-3 text-white">
-                        Two providers. Your keys, your call.
+                        Three providers. Your keys, your call.
                     </h2>
                     <p className="mt-5 text-soft">
                         Choose the model that fits your workflow and budget. Switch in a
@@ -14,13 +14,14 @@ export function Providers() {
                     </p>
                 </div>
 
-                <div className="grid gap-6 lg:grid-cols-2">
+                <div className="grid gap-6 lg:grid-cols-3">
                     <ProviderCard
                         name="Google Gemini"
                         tag="Recommended · Free tier"
                         model="gemini-1.5-flash · gemini-2.0-flash"
                         quota="15 req/min · 1,500/day · 1M tokens/month"
                         href="https://aistudio.google.com/app/apikey"
+                        icon="/icons/google-gemini.svg"
                     />
                     <ProviderCard
                         name="OpenAI GPT-4o"
@@ -28,6 +29,16 @@ export function Providers() {
                         model="gpt-4o-mini · gpt-4o"
                         quota="Best for production-grade rewriting"
                         href="https://platform.openai.com/api-keys"
+                        icon="/icons/openai.svg"
+                        iconInvert
+                    />
+                    <ProviderCard
+                        name="Anthropic Claude"
+                        tag="Pay-as-you-go"
+                        model="claude-haiku-4-5 · claude-sonnet-4-6"
+                        quota="Cheapest completions via Haiku"
+                        href="https://console.anthropic.com/settings/keys"
+                        icon="/icons/anthropic.svg"
                     />
                 </div>
             </div>
@@ -41,12 +52,16 @@ function ProviderCard({
     model,
     quota,
     href,
+    icon,
+    iconInvert,
 }: {
     name: string;
     tag: string;
     model: string;
     quota: string;
     href: string;
+    icon?: string;
+    iconInvert?: boolean;
 }) {
     return (
         <article className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-8">
@@ -57,9 +72,19 @@ function ProviderCard({
                 </span>
             </div>
 
-            <h3 className="font-display mt-5 text-[1.5rem] font-medium tracking-[-0.02em] text-white">
-                {name}
-            </h3>
+            <div className="mt-5 flex items-center gap-3">
+                {icon && (
+                    <img
+                        src={icon}
+                        alt=""
+                        aria-hidden
+                        className={"h-9 w-9 rounded-lg object-contain" + (iconInvert ? " invert" : "")}
+                    />
+                )}
+                <h3 className="font-display text-[1.5rem] font-medium tracking-[-0.02em] text-white">
+                    {name}
+                </h3>
+            </div>
 
             <dl className="mt-6 space-y-4">
                 <Row label="Models" value={model} />
