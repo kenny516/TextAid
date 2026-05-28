@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useReveal } from "../../lib/use-reveal";
 
 const REPO = "https://github.com/kenny516/TextAid";
 const RELEASES = `${REPO}/releases/latest`;
@@ -10,10 +11,13 @@ const AMO_URL = "https://addons.mozilla.org/firefox/addon/textaid/"; // ← repl
 const EDGE_URL = "https://microsoftedge.microsoft.com/addons/detail/textaid/"; // ← replace after Edge approval
 
 export function Download() {
+    const headingRef = useReveal<HTMLDivElement>();
+    const gridRef = useReveal<HTMLDivElement>(0.05);
+
     return (
         <section id="install" className="px-6 py-24 sm:py-32">
             <div className="mx-auto max-w-5xl">
-                <div className="mb-14 max-w-xl">
+                <div ref={headingRef} className="reveal-scroll mb-14 max-w-xl">
                     <span className="eyebrow">Install in under a minute</span>
                     <h2 className="display-lg mt-3 text-white">
                         Download for your browser.
@@ -24,7 +28,7 @@ export function Download() {
                     </p>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-2">
+                <div ref={gridRef} className="reveal-scroll grid gap-4 md:grid-cols-2 [transition-delay:100ms]">
                     <DownloadCard
                         family="Chromium"
                         title="Chrome, Brave, Edge, Opera, Arc, Vivaldi"

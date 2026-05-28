@@ -1,11 +1,14 @@
 /**
  * A faux browser window containing a paragraph of text with a
  * "selected" excerpt and the TextAid floating toolbar nearby.
+ * Both the browser chrome and the simulated page adapt to the theme.
+ * Only the extension UI (toolbar + summary card) stays dark — the
+ * extension has its own dark UI that overlays any webpage.
  */
 export function ExtensionMockup() {
     return (
-        <div className="dark-zone relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4">
-            {/* Faux browser chrome */}
+        <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4">
+            {/* Faux browser chrome — theme-adaptive */}
             <div className="flex items-center justify-between border-b border-white/[0.08] px-4 py-2.5">
                 <div className="flex items-center gap-1.5">
                     <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
@@ -21,45 +24,49 @@ export function ExtensionMockup() {
                 </div>
             </div>
 
-            {/* Page body */}
-            <div className="relative mt-4 grid gap-6 rounded-xl bg-[#0f0f0f] p-7 sm:p-12">
-                <div>
-                    <span className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-white/35">
-                        Essay · 7 min read
-                    </span>
-                    <h3 className="font-display mt-3 text-2xl font-medium tracking-tight text-white sm:text-[1.85rem]">
-                        The quiet death of the blank page
-                    </h3>
+            {/* Simulated page — theme-adaptive (like a real webpage) */}
+            <div className="relative mt-4 overflow-hidden rounded-xl bg-[#0a0a0a]">
+                {/* Page body */}
+                <div className="grid gap-6 p-7 sm:p-12">
+                    <div>
+                        <span className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-white/35">
+                            Essay · 7 min read
+                        </span>
+                        <h3 className="font-display mt-3 text-2xl font-medium tracking-tight text-white sm:text-[1.85rem]">
+                            The quiet death of the blank page
+                        </h3>
+                    </div>
+
+                    <p className="text-[0.98rem] leading-[1.75] text-white/65 sm:text-[1.05rem]">
+                        For decades, the cursor has been a tiny vertical accusation.
+                        Writing meant{" "}
+                        <mark className="rounded-sm bg-white/10 px-1.5 py-0.5 text-white outline outline-1 outline-white/20">
+                            staring at emptiness until something{"\u00a0"}emerged
+                        </mark>
+                        . Today the cursor still blinks — but a soft, listening intelligence
+                        blinks alongside it, ready when invited. Not to write for you, but
+                        with you.
+                    </p>
+
+                    {/* Inline ghost text demo */}
+                    <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-4 py-3 font-mono text-[0.85rem] leading-relaxed">
+                        <span className="text-white/80">AI is reshaping how we think about</span>
+                        <span className="text-white/30 select-none"> creativity and collaboration —</span>
+                        <span className="inline-flex items-center gap-1.5 ml-1">
+                            <span className="rounded border border-white/[0.12] bg-white/[0.04] px-1 py-px text-[0.65rem] font-sans text-white/40 tracking-wide">Tab</span>
+                            <span className="text-[0.65rem] font-sans text-white/25 tracking-wide">to accept</span>
+                        </span>
+                    </div>
+
+                    <p className="text-[0.98rem] leading-[1.75] text-white/45 sm:text-[1.05rem]">
+                        The page is no longer blank.
+                    </p>
                 </div>
 
-                <p className="text-[0.98rem] leading-[1.75] text-white/65 sm:text-[1.05rem]">
-                    For decades, the cursor has been a tiny vertical accusation.
-                    Writing meant{" "}
-                    <mark className="rounded-sm bg-white/10 px-1.5 py-0.5 text-white outline outline-1 outline-white/20">
-                        staring at emptiness until something{"\u00a0"}emerged
-                    </mark>
-                    . Today the cursor still blinks — but a soft, listening intelligence
-                    blinks alongside it, ready when invited. Not to write for you, but
-                    with you.
-                </p>
-
-                {/* Inline ghost text demo */}
-                <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-4 py-3 font-mono text-[0.85rem] leading-relaxed">
-                    <span className="text-white/80">AI is reshaping how we think about</span>
-                    <span className="text-white/30 select-none"> creativity and collaboration —</span>
-                    <span className="inline-flex items-center gap-1.5 ml-1">
-                        <span className="rounded border border-white/[0.12] bg-white/[0.04] px-1 py-px text-[0.65rem] font-sans text-white/40 tracking-wide">Tab</span>
-                        <span className="text-[0.65rem] font-sans text-white/25 tracking-wide">to accept</span>
-                    </span>
-                </div>
-
-                <p className="text-[0.98rem] leading-[1.75] text-white/45 sm:text-[1.05rem]">
-                    The page is no longer blank.
-                </p>
+                {/* Extension UI — always dark regardless of theme */}
+                <FloatingToolbar />
+                <SuggestionCard />
             </div>
-
-            <FloatingToolbar />
-            <SuggestionCard />
         </div>
     );
 }
@@ -67,7 +74,7 @@ export function ExtensionMockup() {
 function FloatingToolbar() {
     return (
         <div
-            className="absolute rounded-[10px] border border-white/[0.08] bg-[#0a0a0a] p-1 shadow-[0_8px_24px_rgba(0,0,0,0.4)]"
+            className="dark-zone absolute rounded-[10px] border border-white/[0.08] bg-[#0a0a0a] p-1 shadow-[0_8px_24px_rgba(0,0,0,0.4)]"
             style={{
                 top: "calc(50% - 6px)",
                 left: "8%",
@@ -111,7 +118,7 @@ function ToolBtn({
 function SuggestionCard() {
     return (
         <div
-            className="absolute hidden overflow-hidden rounded-xl border border-white/[0.08] bg-[#0a0a0a] shadow-[0_20px_50px_rgba(0,0,0,0.6)] lg:block"
+            className="dark-zone absolute hidden overflow-hidden rounded-xl border border-white/[0.08] bg-[#0a0a0a] shadow-[0_20px_50px_rgba(0,0,0,0.6)] lg:block"
             style={{
                 right: "5%",
                 bottom: "8%",

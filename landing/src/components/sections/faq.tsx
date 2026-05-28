@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useReveal } from "../../lib/use-reveal";
 
 const ITEMS = [
     {
@@ -21,17 +22,24 @@ const ITEMS = [
         q: "Do I need to create an account?",
         a: "No account, no signup. You only need a free or paid API key from your chosen provider. The key is stored locally in your browser's secure storage.",
     },
+    {
+        q: "Which languages does translation support?",
+        a: "TextAid supports 16 languages including Spanish, French, German, Portuguese, Japanese, Chinese (Simplified), Korean, Italian, Dutch, Russian, Arabic, Hindi, Turkish, Polish, Swedish, and Vietnamese.",
+    },
 ];
 
 export function Faq() {
+    const headingRef = useReveal<HTMLDivElement>();
+    const listRef = useReveal<HTMLDivElement>(0.05);
+
     return (
         <section id="faq" className="px-6 py-24 sm:py-32">
             <div className="mx-auto max-w-3xl">
-                <div className="mb-12">
+                <div ref={headingRef} className="reveal-scroll mb-12">
                     <span className="eyebrow">FAQ</span>
                     <h2 className="display-lg mt-3 text-white">Common questions.</h2>
                 </div>
-                <div className="divide-y divide-white/[0.08]">
+                <div ref={listRef} className="reveal-scroll divide-y divide-white/[0.08] [transition-delay:100ms]">
                     {ITEMS.map((item) => (
                         <FaqItem key={item.q} q={item.q} a={item.a} />
                     ))}
@@ -43,6 +51,8 @@ export function Faq() {
 
 function FaqItem({ q, a }: { q: string; a: string }) {
     const [open, setOpen] = useState(false);
+    const bodyRef = useRef<HTMLDivElement>(null);
+
     return (
         <div className="py-5">
             <button
@@ -55,7 +65,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
                 <span
                     aria-hidden
                     className={
-                        "flex-shrink-0 text-muted transition-transform duration-200 " +
+                        "flex-shrink-0 text-muted transition-transform duration-300 " +
                         (open ? "rotate-45" : "rotate-0")
                     }
                 >
@@ -64,9 +74,16 @@ function FaqItem({ q, a }: { q: string; a: string }) {
                     </svg>
                 </span>
             </button>
-            {open && (
+            <div
+                ref={bodyRef}
+                className="overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out"
+                style={{
+                    maxHeight: open ? (bodyRef.current ? bodyRef.current.scrollHeight + 16 : 500) : 0,
+                    opacity: open ? 1 : 0,
+                }}
+            >
                 <p className="mt-4 text-[0.88rem] leading-relaxed text-soft">{a}</p>
-            )}
+            </div>
         </div>
     );
 }

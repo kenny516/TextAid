@@ -29,9 +29,7 @@ export function CtaFooter() {
                     </p>
                 </div>
 
-                <footer className="mt-24 pt-10">
-                    <div className="cta-separator mb-10" aria-hidden="true" />
-                    <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
+                <footer className="mt-24 flex flex-col items-center justify-between gap-6 border-t border-white/[0.08] pt-10 sm:flex-row">
                     <div className="flex items-center gap-2.5">
                         <img
                             src="/icon-textaid.png"
@@ -69,7 +67,6 @@ export function CtaFooter() {
                             License
                         </a>
                     </nav>
-                    </div>
                 </footer>
             </div>
         </section>

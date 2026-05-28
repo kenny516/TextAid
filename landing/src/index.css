@@ -208,6 +208,17 @@ footer a:not(.btn-primary):not(.btn-outline):not(.btn-primary-themed):not(.btn-o
 }
 .reveal { animation: reveal-up 600ms ease both; }
 
+/* Scroll-triggered reveal — starts invisible, transitions when .revealed is added */
+.reveal-scroll {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 600ms ease, transform 600ms ease;
+}
+.reveal-scroll.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 /* ---------- Light-mode utility overrides ---------- */
 /* Light theme inspired by Linear/Vercel:
    - body bg = off-white #fafafa
@@ -382,92 +393,4 @@ html.light .glow-accent {
 html.light img.invert {
   filter: none !important;
   opacity: 0.75;
-}
-
-/* ---------- Hero dot grid ---------- */
-.hero-dot-grid {
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.10) 1px, transparent 1px);
-  background-size: 28px 28px;
-  -webkit-mask-image: radial-gradient(ellipse 85% 75% at 50% 35%, black 5%, transparent 100%);
-  mask-image: radial-gradient(ellipse 85% 75% at 50% 35%, black 5%, transparent 100%);
-  pointer-events: none;
-}
-html.light .hero-dot-grid {
-  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.07) 1px, transparent 1px);
-}
-
-/* ---------- Hero ambient glow ---------- */
-.hero-glow {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 700px;
-  height: 400px;
-  background: radial-gradient(ellipse at 50% 20%, rgba(255, 255, 255, 0.032) 0%, transparent 70%);
-  pointer-events: none;
-}
-html.light .hero-glow {
-  background: radial-gradient(ellipse at 50% 20%, rgba(0, 0, 0, 0.018) 0%, transparent 70%);
-}
-
-/* ---------- Hero eyebrow badge ---------- */
-.hero-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  color: var(--muted);
-  border: 1px solid var(--hairline-strong);
-  background: var(--surface-1);
-  border-radius: 9999px;
-  padding: 0.3rem 0.85rem;
-  transition: border-color 200ms ease, background 200ms ease;
-}
-.hero-badge:hover {
-  border-color: var(--hairline-strong);
-  background: var(--surface-2);
-}
-.hero-badge-dot {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  border-radius: 9999px;
-  background: #4ade80;
-  box-shadow: 0 0 6px rgba(74, 222, 128, 0.6);
-  flex-shrink: 0;
-}
-
-/* ---------- Staggered reveal delays ---------- */
-.reveal-1 { animation: reveal-up 600ms ease both; animation-delay: 80ms; }
-.reveal-2 { animation: reveal-up 600ms ease both; animation-delay: 180ms; }
-.reveal-3 { animation: reveal-up 600ms ease both; animation-delay: 300ms; }
-.reveal-4 { animation: reveal-up 600ms ease both; animation-delay: 440ms; }
-
-/* ---------- CTA gradient separator ---------- */
-.cta-separator {
-  width: 100%;
-  height: 1px;
-  background: linear-gradient(90deg,
-    transparent 0%,
-    var(--hairline-strong) 25%,
-    rgba(255, 255, 255, 0.22) 50%,
-    var(--hairline-strong) 75%,
-    transparent 100%
-  );
-  margin-bottom: 0;
-}
-html.light .cta-separator {
-  background: linear-gradient(90deg,
-    transparent 0%,
-    #d4d4d8 25%,
-    #a1a1aa 50%,
-    #d4d4d8 75%,
-    transparent 100%
-  );
 }
