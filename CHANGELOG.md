@@ -7,6 +7,14 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+- **Anthropic Claude provider**: choose Claude in the popup and enter a
+  `sk-ant-...` API key. Supported models: `claude-haiku-4-5` (default /
+  cheapest), `claude-sonnet-4-6` (recommended), `claude-opus-4-7`
+  (premium). Full streaming support, rich error messages (401, 403, 404,
+  429, 529/overloaded), and a **Test** button in the popup — consistent
+  with the existing OpenAI and Gemini experiences.
+
 ## [1.3.0] - 2026-05-21
 
 ### Added

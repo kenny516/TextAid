@@ -5,9 +5,9 @@
 > leaving the tab.
 
 TextAid is a Manifest V3 cross-browser extension. Bring your own
-**OpenAI** or **Google Gemini** key; everything runs locally between
-your browser and the provider you chose. No TextAid server, no proxy,
-no account.
+**OpenAI**, **Google Gemini**, or **Anthropic Claude** key; everything
+runs locally between your browser and the provider you chose. No TextAid
+server, no proxy, no account.
 
 - 🛒 **Stores** — Chrome Web Store, Microsoft Edge Add-ons, Firefox AMO,
   Opera Add-ons, Mac App Store (Safari).
@@ -23,10 +23,17 @@ no account.
 - **Translate** to 16 languages from a submenu (EN, FR, ES, DE, IT, PT,
   NL, PL, RU, UK, TR, AR, ZH, JA, KO, HI).
 - **Expand** a sentence into a full paragraph.
+- **Inline suggestions (ghost completions)** — when enabled in the popup,
+  TextAid watches any editable field (`input`, `textarea`,
+  `contenteditable`). After 20+ characters and a 600 ms pause at a word
+  boundary, it displays a short AI completion below the field. Press
+  **Tab** to accept or **Escape** to dismiss.
 - **Markdown rendering** in the result modal (bold, lists, code blocks,
   headings, links).
 - **Rich error messages** with actionable hints when a model is
   rate-limited, out of quota or unavailable.
+- **Free / Paid badge** next to every model in the popup so you always
+  know which Gemini tiers stay free.
 - **Direct keyboard shortcuts** — `Alt+Shift+S` summarize,
   `Alt+Shift+R` rewrite, `Alt+Shift+T` translate,
   `Ctrl+Shift+Y` (`Cmd+Shift+Y` on macOS) open the toolbar on the
@@ -40,11 +47,13 @@ Choose your provider in the popup and paste your API key.
 | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
 | **Google Gemini** _(recommended)_ | `gemini-2.5-flash` (default), `2.5-flash-lite`, `3-flash`, `2.5-pro`, `3-pro` (legacy `2.0-flash`, `1.5-pro` kept for back-compat) | Free tier available |
 | **OpenAI**                        | `gpt-4o-mini`, `gpt-4o`, `gpt-4.1-nano/mini/full`, `gpt-5-mini`, `gpt-5`                                                           | Pay-per-use         |
+| **Anthropic Claude**              | `claude-haiku-4-5` (default), `claude-sonnet-4-6`, `claude-opus-4-7`                                                               | Pay-per-use         |
 
 Get a key:
 
 - Gemini → <https://aistudio.google.com/app/apikey>
 - OpenAI → <https://platform.openai.com/api-keys>
+- Claude → <https://console.anthropic.com/settings/keys>
 
 ## Install
 

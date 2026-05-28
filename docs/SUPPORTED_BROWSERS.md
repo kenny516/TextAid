@@ -29,8 +29,8 @@ Outputs:
 dist/
 ├── chrome/                      ← unpacked, ready to "Load unpacked"
 ├── firefox/                     ← unpacked, ready to "Load Temporary Add-on"
-├── textaid-chrome-1.1.0.zip     ← upload to Chrome Web Store
-└── textaid-firefox-1.1.0.zip    ← upload to AMO
+├── textaid-chrome-X.Y.Z.zip     ← upload to Chrome Web Store
+└── textaid-firefox-X.Y.Z.zip    ← upload to AMO
 ```
 
 Single target:
