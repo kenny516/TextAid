@@ -18,7 +18,7 @@ export function Providers() {
                     <ProviderCard
                         name="Google Gemini"
                         tag="Recommended · Free tier"
-                        model="gemini-1.5-flash · gemini-2.0-flash"
+                        model="gemini-2.5-flash · gemini-2.5-pro"
                         quota="15 req/min · 1,500/day · 1M tokens/month"
                         href="https://aistudio.google.com/app/apikey"
                         icon="/icons/google-gemini.svg"

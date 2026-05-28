@@ -5,6 +5,10 @@ const RELEASES = `${REPO}/releases/latest`;
 const CHROME_ZIP = `${RELEASES}/download/textaid-chrome.zip`;
 const FIREFOX_ZIP = `${RELEASES}/download/textaid-firefox.zip`;
 
+// Update these URLs once the store listings are approved:
+const AMO_URL = "https://addons.mozilla.org/firefox/addon/textaid/"; // ← replace with real URL after AMO approval
+const EDGE_URL = "https://microsoftedge.microsoft.com/addons/detail/textaid/"; // ← replace after Edge approval
+
 export function Download() {
     return (
         <section id="install" className="px-6 py-24 sm:py-32">
@@ -37,12 +41,12 @@ export function Download() {
                     <DownloadCard
                         family="Gecko"
                         title="Firefox, Zen, LibreWolf"
-                        primary={{ label: "Download .zip", href: FIREFOX_ZIP }}
-                        secondary={{ label: "addons.mozilla.org ↗", href: REPO }}
+                        primary={{ label: "Get on Firefox ↗", href: FIREFOX_ZIP }}
+                        secondary={{ label: "addons.mozilla.org ↗", href: AMO_URL }}
                         steps={[
-                            "Unzip the archive",
-                            "Open about:debugging#/runtime/this-firefox",
-                            "Click Load Temporary Add-on…",
+                            "Click 'Get on Firefox' to install from AMO",
+                            "Or download the .zip for manual install",
+                            "Open about:debugging → Load Temporary Add-on…",
                             "Select the manifest.json inside",
                         ]}
                         icon={<BrowserStack icons={["firefox", "zen-browser", "librewolf"]} />}

@@ -58,13 +58,54 @@ Pushing a `v*.*.*` tag triggers `.github/workflows/release.yml`, which:
 The landing page's Download buttons point at `releases/latest/download/...`,
 so they automatically pick up the new artifacts.
 
-## 5. Submit to the Web Store / AMO (optional)
+## 5. Automated store publishing
 
-The same zips work for:
+Pushing a `v*.*.*` tag also triggers the store publish workflows:
 
-- **Chrome Web Store** — upload `dist/textaid-chrome-X.Y.Z.zip`
-- **Firefox AMO** — upload `dist/textaid-firefox-X.Y.Z.zip` (signed automatically)
-- **Edge Add-ons** — same as Chromium
+### Firefox AMO (`publish-amo.yml`)
+
+Signs and submits the Firefox build to addons.mozilla.org automatically.
+
+**Required repository secrets** (Settings → Secrets and variables → Actions):
+
+| Secret | Where to get it |
+|--------|----------------|
+| `AMO_JWT_ISSUER` | https://addons.mozilla.org/developers/addon/api/key/ |
+| `AMO_JWT_SECRET` | same page |
+
+### Microsoft Edge Add-ons (`publish-edge.yml`)
+
+Uploads and publishes the Chrome build to the Edge Partner Center.
+
+**Required repository secrets:**
+
+| Secret | Where to get it |
+|--------|----------------|
+| `EDGE_PRODUCT_ID` | Edge Partner Center → your product URL |
+| `EDGE_CLIENT_ID` | Azure AD app registration |
+| `EDGE_CLIENT_SECRET` | Azure AD app → Certificates & secrets |
+| `EDGE_ACCESS_TOKEN_URL` | Azure AD app → Overview → Endpoints |
+
+Setup guide: https://learn.microsoft.com/microsoft-edge/extensions-chromium/publish/api/using-addons-api
+
+**First-time AMO submission:** you must first create the listing manually
+at https://addons.mozilla.org/developers/submit/ before the CI workflow
+can sign and update it.
+
+**First-time Edge submission:** create the product manually at
+https://partner.microsoft.com/dashboard/microsoftedge/overview and note
+the product ID before enabling the workflow.
+
+## 6. Generate store assets
+
+Before submitting to stores, generate the required promo tiles and icons:
+
+```bash
+npm install          # installs sharp and canvas (new dev deps)
+npm run assets       # writes to store-assets/
+```
+
+Then capture screenshots manually — see `store-assets/SCREENSHOT_GUIDE.md`.
 
 ## Hotfix flow
 

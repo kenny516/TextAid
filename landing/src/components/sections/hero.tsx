@@ -9,7 +9,7 @@ export function Hero() {
             className="px-6 pt-32 pb-20 sm:pt-40"
         >
             <div className="mx-auto max-w-5xl text-center">
-                <span className="eyebrow">v1.3.0 · Free, open source</span>
+                <span className="eyebrow">v1.4.0 · Free, open source</span>
 
                 <div className="mt-6">
                     <SplitText
@@ -46,7 +46,7 @@ export function Hero() {
                 </div>
 
                 <p className="reveal mt-6 font-mono text-[11px] tracking-[0.18em] text-muted uppercase">
-                    Bring your own key · Gemini &amp; GPT-4o · Works on every site
+                    Bring your own key · Gemini, GPT-4o &amp; Claude · Works on every site
                 </p>
             </div>
 

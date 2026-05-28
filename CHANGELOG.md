@@ -7,6 +7,8 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-05-28
+
 ### Added
 - **Anthropic Claude provider**: choose Claude in the popup and enter a
   `sk-ant-...` API key. Supported models: `claude-haiku-4-5` (default /

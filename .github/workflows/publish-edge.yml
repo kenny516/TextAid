@@ -1,0 +1,77 @@
+name: Publish — Microsoft Edge Add-ons
+
+# Triggered automatically when a vX.Y.Z tag is pushed (same event as release.yml).
+# Requires four repository secrets:
+#   EDGE_PRODUCT_ID        — your Edge Add-ons product ID (from Partner Center dashboard)
+#   EDGE_CLIENT_ID         — Azure AD app client ID
+#   EDGE_CLIENT_SECRET     — Azure AD app client secret
+#   EDGE_ACCESS_TOKEN_URL  — token endpoint, e.g.
+#                            https://login.microsoftonline.com/<tenant-id>/oauth2/v2.0/token
+#
+# Setup guide:
+#   1. Enroll at https://partner.microsoft.com/dashboard/microsoftedge/overview
+#   2. Register an Azure AD app and grant it the Edge Submission API permission.
+#   3. Generate a client secret and note the client ID.
+#   4. Find the Access Token URL in the app's "Overview → Endpoints" blade.
+#   5. Copy your product ID from the Edge Partner Center URL or dashboard.
+#   6. Add all four values as repository secrets.
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  publish-edge:
+    name: Submit to Microsoft Edge Add-ons
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci || npm install
+
+      - name: Build Chrome extension (Edge uses the Chromium build)
+        run: npm run build:chrome
+
+      - name: Read version
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Get Edge API access token
+        id: token
+        run: |
+          TOKEN=$(curl -s -X POST "${{ secrets.EDGE_ACCESS_TOKEN_URL }}" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -d "client_id=${{ secrets.EDGE_CLIENT_ID }}" \
+            -d "client_secret=${{ secrets.EDGE_CLIENT_SECRET }}" \
+            -d "scope=https://api.addons.microsoftedge.microsoft.com/.default" \
+            -d "grant_type=client_credentials" \
+            | jq -r '.access_token')
+          echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
+
+      - name: Upload new package to Edge
+        run: |
+          ZIP="dist/textaid-chrome-${{ steps.version.outputs.version }}.zip"
+          OPERATION_ID=$(curl -s -X POST \
+            "https://api.addons.microsoftedge.microsoft.com/v1/products/${{ secrets.EDGE_PRODUCT_ID }}/submissions/draft/package" \
+            -H "Authorization: Bearer ${{ steps.token.outputs.token }}" \
+            -H "Content-Type: application/zip" \
+            --data-binary "@$ZIP" \
+            | jq -r '.id')
+          echo "operation_id=$OPERATION_ID" >> "$GITHUB_ENV"
+
+      - name: Publish submission to Edge
+        run: |
+          curl -s -X POST \
+            "https://api.addons.microsoftedge.microsoft.com/v1/products/${{ secrets.EDGE_PRODUCT_ID }}/submissions" \
+            -H "Authorization: Bearer ${{ steps.token.outputs.token }}" \
+            -H "Content-Type: application/json" \
+            -d '{"notes": "Automated release from GitHub Actions."}'
