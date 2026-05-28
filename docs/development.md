@@ -1,301 +1,178 @@
-# 🚀 Guide de Développement - TextAid
+# Development Guide — TextAid
 
-## 🛠️ Configuration de l'Environnement
+## Prerequisites
 
-### Prérequis
+- **Node.js** 18+ and **npm**
+- **Git** 2.40+
+- A Chromium-based browser (Chrome, Brave, Edge…) or Firefox for testing
 
-- **Git** : Version 2.40+
-- **Chrome** : Version 100+ avec mode développeur
-- **Éditeur** : VS Code recommandé avec extensions :
-  - Git Graph
-  - Chrome Extension Dev Tools
-  - Prettier
-  - ESLint
+Recommended editor: VS Code with these extensions:
+- [Biome](https://marketplace.visualstudio.com/items?itemName=biomejs.biome) — linting and formatting (the project uses Biome, not ESLint/Prettier)
+- [Git Graph](https://marketplace.visualstudio.com/items?itemName=mhutchie.git-graph)
 
-### Installation
+## Setup
 
 ```bash
-# Cloner le repository
-git clone https://github.com/kenny516/textaid-extension.git
-cd textaid-extension
-
-# Vérifier l'installation
-git status
+git clone https://github.com/kenny516/TextAid.git
+cd TextAid
+npm install
 ```
 
-## 🌿 Workflow Git
+## Development workflow
 
-### Structure des Branches
-
-```
-main (production)
-├── dev (développement)
-│   ├── feat/design-system
-│   ├── feat/ai-integration
-│   ├── feat/popup-interface
-│   └── fix/display-issues
-└── hotfix/critical-bug
-```
-
-### Conventions de Nommage
-
-#### Branches
-
-- `feat/` : Nouvelles fonctionnalités
-- `fix/` : Corrections de bugs
-- `hotfix/` : Corrections urgentes production
-- `docs/` : Documentation uniquement
-- `refactor/` : Refactoring sans nouvelles fonctionnalités
-- `test/` : Ajout ou modification de tests
-
-#### Commits (Conventional Commits)
+### Build once
 
 ```bash
-feat: ajouter floating toolbar avec glassmorphism
-fix: corriger l'affichage des modales sur Firefox
-docs: mettre à jour le guide d'installation
-style: appliquer le design system Vercel
-refactor: optimiser le code de content.js
-test: ajouter tests pour les fournisseurs IA
+npm run build           # builds dist/chrome/ and dist/firefox/
+npm run build:chrome    # Chrome-only
+npm run build:firefox   # Firefox-only
 ```
 
-### Processus de Développement
-
-#### 1. Démarrer une Nouvelle Fonctionnalité
+### Watch mode (auto-rebuild on save)
 
 ```bash
-# Mettre à jour dev
-git checkout dev
-git pull origin dev
-
-# Créer la branche de fonctionnalité
-git checkout -b feat/nom-fonctionnalite
-
-# Vérifier la branche
-git branch
+npm run dev:chrome
+npm run dev:firefox
 ```
 
-#### 2. Développement
+### Load the unpacked build in your browser
+
+**Chromium** (Chrome, Brave, Edge, Opera, Arc, Vivaldi):
+
+1. Open `chrome://extensions/` (or `brave://extensions/`, `edge://extensions/`, etc.)
+2. Enable **Developer mode** (top-right toggle)
+3. Click **Load unpacked** → select `dist/chrome/`
+4. After each rebuild, click the refresh icon on the extension card
+   (or use the "Extensions: Reload extension" VS Code command if you have
+   the Chrome Extension dev-tools installed)
+
+**Firefox / Zen / LibreWolf**:
+
+1. Open `about:debugging#/runtime/this-firefox`
+2. Click **Load Temporary Add-on…**
+3. Select `dist/firefox/manifest.json`
+
+> Temporary add-ons disappear on browser restart. For a permanent local
+> install, sign the build via AMO (free) to get a `.xpi` file.
+
+## Project layout
+
+```
+TextAid/
+├── manifest.json          # MV3 manifest (canonical Chrome entry point)
+├── background.js          # Service worker — handles API calls, context menus, shortcuts
+├── content.js             # Injected into pages — toolbar, dropdown, modal, suggestions
+├── content.css            # Injected styles (dark monochrome, double-class specificity)
+├── popup.html / .css / .js
+├── icons/
+├── lib/
+│   ├── errors.js          # friendlyError() — parses provider error bodies
+│   └── markdown.js        # renderMarkdown() — converts MD to safe HTML
+├── scripts/
+│   ├── build.mjs          # Bundles dist/chrome and dist/firefox
+│   ├── watch.mjs          # File watcher that triggers build.mjs
+│   └── version.mjs        # Bumps version in package.json, manifest.json, landing/package.json
+├── tests/
+│   ├── errors.test.js
+│   └── markdown.test.js
+├── landing/               # Marketing site (Vite + React)
+└── docs/
+    ├── SUPPORTED_BROWSERS.md
+    ├── STORE_LISTING.md
+    └── development.md     # this file
+```
+
+## Testing
+
+Tests are written with [Vitest](https://vitest.dev/) and cover the shared
+`lib/` helpers.
 
 ```bash
-# Développer la fonctionnalité
-# ... coding ...
+npm run test          # single run
+npm run test:watch    # watch mode
+```
 
-# Ajouter les fichiers modifiés
+## Linting
+
+The project uses [Biome](https://biomejs.dev/) for both linting and
+formatting (no ESLint, no Prettier).
+
+```bash
+npm run lint          # check lib/ and tests/
+npm run lint:fix      # auto-fix safe issues
+```
+
+## Debugging
+
+Open browser DevTools on the relevant context:
+
+| Context          | How to open                                           |
+| ---------------- | ----------------------------------------------------- |
+| Service worker   | `chrome://extensions/` → "Service worker" link        |
+| Content script   | DevTools on any page → Console (select the extension) |
+| Popup            | Right-click the extension icon → "Inspect popup"      |
+
+Useful snippet in the page console to check if the content script loaded:
+
+```js
+document.querySelectorAll('.textaid-toolbar, .textaid-modal, .textaid-suggestion')
+```
+
+The main injected CSS class is `.textaid-root` (double-class specificity
+`.textaid-root.textaid-root` is used in `content.css` to override host styles).
+
+## Git workflow
+
+### Branch naming
+
+| Prefix       | Purpose                                  |
+| ------------ | ---------------------------------------- |
+| `feat/`      | New features                             |
+| `fix/`       | Bug fixes                                |
+| `hotfix/`    | Urgent production fixes                  |
+| `docs/`      | Documentation-only changes               |
+| `refactor/`  | Code cleanup without behaviour change    |
+| `test/`      | Adding or modifying tests                |
+
+### Commit messages (Conventional Commits)
+
+```
+feat: add grammar-fix action to the toolbar
+fix: prevent dropdown from closing on scroll
+docs: update provider table in README
+refactor: extract streaming logic into helper
+test: add edge cases for friendlyError Claude path
+```
+
+### Feature branch flow
+
+```bash
+# Start from main
+git checkout main && git pull
+
+# New branch
+git checkout -b feat/my-feature
+
+# … develop …
 git add .
-
-# Commit avec message descriptif
-git commit -m "feat: description de la fonctionnalité"
-
-# Push réguliers pour sauvegarder
-git push origin feat/nom-fonctionnalite
+git commit -m "feat: my feature description"
+git push origin feat/my-feature
 ```
 
-#### 3. Pull Request
+Then open a PR targeting `main`.
+
+## Releasing
+
+See [`RELEASING.md`](../RELEASING.md) for the full release flow.
+The short version:
 
 ```bash
-# S'assurer que dev est à jour
-git checkout dev
-git pull origin dev
-
-# Rebaser la branche si nécessaire
-git checkout feat/nom-fonctionnalite
-git rebase dev
-
-# Push final
-git push origin feat/nom-fonctionnalite
+npm run version:set -- minor   # bumps package.json, manifest.json, landing/package.json
+# update CHANGELOG.md
+git commit -am "Release X.Y.Z"
+git tag vX.Y.Z && git push --follow-tags
 ```
 
-Ensuite, créer la PR sur GitHub :
+A GitHub Actions workflow then builds the browser zips and creates a
+GitHub Release automatically.
 
-- Base : `dev`
-- Compare : `feat/nom-fonctionnalite`
-- Template de description (voir ci-dessous)
-
-## 📋 Template Pull Request
-
-```markdown
-## 🎯 Description
-
-Brève description de la fonctionnalité ou correction
-
-## ✅ Type de Changement
-
-- [ ] 🐛 Bug fix (correction non-breaking)
-- [ ] ✨ Nouvelle fonctionnalité (changement non-breaking)
-- [ ] 💥 Breaking change (correction ou fonctionnalité breaking)
-- [ ] 📚 Documentation uniquement
-
-## 🧪 Tests Effectués
-
-- [ ] Tests manuels sur Chrome
-- [ ] Tests de régression
-- [ ] Tests sur différents sites web
-- [ ] Vérification du design system
-
-## 📱 Screenshots
-
-[Ajouter des screenshots si applicable]
-
-## 🔗 Issues Liées
-
-Closes #123
-Relates to #456
-
-## ✅ Checklist
-
-- [ ] Mon code suit les guidelines du projet
-- [ ] J'ai effectué une auto-review
-- [ ] J'ai commenté les parties complexes
-- [ ] J'ai mis à jour la documentation
-- [ ] Mes changements ne génèrent pas de warnings
-- [ ] J'ai testé sur plusieurs sites web
-```
-
-## 🧪 Tests et Validation
-
-### Tests Manuels
-
-1. **Chargement Extension**
-
-```bash
-# Recharger l'extension
-powershell -ExecutionPolicy Bypass -File "reload-extension.ps1"
-```
-
-2. **Tests Fonctionnels**
-
-- Ouvrir `debug-test.html`
-- Tester chaque fonctionnalité
-- Vérifier sur différents sites (Google, GitHub, etc.)
-
-3. **Tests Design**
-
-- Vérifier le design system
-- Tester les animations
-- Contrôler la compatibilité mobile
-
-### Debug et Dépannage
-
-#### Console Chrome DevTools
-
-```javascript
-// Vérifier le chargement de l'extension
-console.log("TextAid loaded:", !!window.textAid);
-
-// Vérifier les styles CSS
-getComputedStyle(document.querySelector(".textaid-floating-toolbar"));
-```
-
-#### Erreurs Communes
-
-1. **Extension non chargée**
-
-   - Vérifier le manifest.json
-   - Recharger l'extension
-   - Vérifier les permissions
-
-2. **Styles non appliqués**
-
-   - Forcer le rechargement CSS
-   - Vérifier les conflits de styles
-   - Utiliser les styles inline si nécessaire
-
-3. **API non fonctionnelles**
-   - Vérifier les clés API
-   - Contrôler les quotas
-   - Vérifier la connectivité réseau
-
-## 📦 Release et Déploiement
-
-### Préparation Release
-
-```bash
-# Mettre à jour main avec dev
-git checkout main
-git pull origin main
-git merge dev
-
-# Tag de version
-git tag -a v2.0.0 -m "Release v2.0.0 - Design Vercel"
-git push origin v2.0.0
-
-# Push vers main
-git push origin main
-```
-
-### Génération Package
-
-```bash
-# Créer le package pour Chrome Web Store
-# (à automatiser avec script)
-zip -r textaid-v2.0.0.zip . -x "*.git*" "docs/*" "*.md" "debug-*"
-```
-
-## 🔧 Configuration VS Code
-
-### Extensions Recommandées
-
-```json
-{
-  "recommendations": [
-    "ms-vscode.vscode-git-graph",
-    "esbenp.prettier-vscode",
-    "ms-vscode.vscode-eslint",
-    "ritwickdey.liveserver",
-    "bradlc.vscode-tailwindcss"
-  ]
-}
-```
-
-### Settings
-
-```json
-{
-  "editor.formatOnSave": true,
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true
-  },
-  "git.autofetch": true,
-  "git.confirmSync": false
-}
-```
-
-## 🎯 Bonnes Pratiques
-
-### Code Quality
-
-- **Noms explicites** : Variables et fonctions descriptives
-- **Commentaires** : Expliquer le "pourquoi", pas le "quoi"
-- **Modularité** : Fonctions courtes et spécialisées
-- **Consistency** : Suivre les conventions établies
-
-### Git Workflow
-
-- **Commits atomiques** : Un changement = un commit
-- **Messages clairs** : Décrire l'impact du changement
-- **Branches courtes** : Merger rapidement
-- **Historique propre** : Rebase avant merge si nécessaire
-
-### Testing
-
-- **Test early, test often** : Tester à chaque modification
-- **Cross-browser** : Vérifier sur différents navigateurs
-- **Real conditions** : Tester sur vrais sites web
-- **Edge cases** : Tester les cas limites
-
----
-
-## 🆘 Support
-
-### Problèmes Communs
-
-- [Issues GitHub](https://github.com/kenny516/textaid-extension/issues)
-- Documentation technique dans `/docs`
-- Changelog pour historique des modifications
-
-### Contact Développement
-
-- **GitHub** : [@kenny516](https://github.com/kenny516)
-- **Issues** : Créer un ticket sur GitHub
-- **Discussions** : GitHub Discussions du projet

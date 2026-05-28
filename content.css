@@ -537,6 +537,16 @@
   stroke-width: 1.5;
 }
 
+.textaid-modal.textaid-root .ta-foot-btn--stop {
+  color: var(--ta-fg-muted, #888);
+  margin-left: auto;
+}
+.textaid-modal.textaid-root .ta-foot-btn--stop:hover {
+  color: #ef4444;
+  border-color: #ef4444;
+  background: transparent;
+}
+
 /* Custom prompt input modal */
 .textaid-modal.textaid-root .ta-prompt-input {
   width: 100%;

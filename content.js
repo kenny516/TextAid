@@ -623,6 +623,14 @@ class TextAid {
     overlay.addEventListener("click", (e) => {
       if (e.target === overlay) this.hideModal();
     });
+    const stopBtn = document.createElement("button");
+    stopBtn.type = "button";
+    stopBtn.className = "ta-foot-btn ta-foot-btn--stop";
+    stopBtn.innerHTML = `${tIcon("square")}<span>Stop</span>`;
+    stopBtn.addEventListener("click", () => {
+      chrome.runtime.sendMessage({ action: "cancelStream" });
+    });
+    overlay.querySelector("[data-foot]").appendChild(stopBtn);
     this.modal = overlay;
     this.modalState = {
       action,
@@ -724,6 +732,8 @@ class TextAid {
 
   showStreamError(error) {
     if (!this.modal) return;
+    const foot = this.modal.querySelector("[data-foot]");
+    if (foot) foot.innerHTML = "";
     const body = this.modal.querySelector("[data-body]");
     body.classList.remove("ta-md");
     body.classList.add("ta-modal-body--center");
