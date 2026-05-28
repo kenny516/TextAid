@@ -20,16 +20,8 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install linters (if package.json exists)
-        run: |
-          if [ -f package.json ]; then npm ci || true; fi
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Run basic syntax check
-        run: |
-          # If there is package.json and an npm script 'lint', run it
-          if [ -f package.json ] && npm run | grep -q lint; then
-            npm run lint
-          else
-            # Fallback: run a simple Node syntax check on .js files
-            find . -name "*.js" -not -path "./node_modules/*" -print0 | xargs -0 -n1 node -c || true
-          fi
+      - name: Run lint
+        run: npm run lint
