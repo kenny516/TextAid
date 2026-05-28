@@ -208,6 +208,17 @@ footer a:not(.btn-primary):not(.btn-outline):not(.btn-primary-themed):not(.btn-o
 }
 .reveal { animation: reveal-up 600ms ease both; }
 
+/* Scroll-triggered reveal — starts invisible, transitions when .revealed is added */
+.reveal-scroll {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 600ms ease, transform 600ms ease;
+}
+.reveal-scroll.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 /* ---------- Light-mode utility overrides ---------- */
 /* Light theme inspired by Linear/Vercel:
    - body bg = off-white #fafafa

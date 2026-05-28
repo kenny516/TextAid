@@ -1,6 +1,6 @@
 {
   "name": "textaid-extension",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Cross-browser AI writing assistant (Chrome, Firefox, Brave, Edge, Opera, Arc, Vivaldi, Zen, Safari)",
   "type": "module",
   "scripts": {
@@ -11,6 +11,7 @@
     "dev:chrome": "node scripts/watch.mjs chrome",
     "dev:firefox": "node scripts/watch.mjs firefox",
     "version:set": "node scripts/version.mjs",
+    "assets": "node store-assets/generate-assets.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "biome check lib/ tests/",
@@ -19,6 +20,8 @@
   "devDependencies": {
     "@biomejs/biome": "^2.4.15",
     "adm-zip": "^0.5.16",
+    "canvas": "^3.1.0",
+    "sharp": "^0.34.2",
     "vitest": "^4.1.7"
   },
   "keywords": [

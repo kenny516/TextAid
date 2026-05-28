@@ -16,7 +16,7 @@ Microsoft Edge Add-ons, and Mozilla Add-ons (AMO).
 
 - **Name**: `TextAid`
 - **Short tagline (≤ 45 chars)**: `AI writing layer for any web page`
-- **One-liner (≤ 132 chars)**: `Summarize, rewrite, translate and expand any text on any page — using your own OpenAI or Gemini key. No servers.`
+- **One-liner (≤ 132 chars)**: `Summarize, rewrite, translate and expand any text on any page — using your own OpenAI, Gemini, or Claude key. No servers.`
 
 ---
 
@@ -25,7 +25,7 @@ Microsoft Edge Add-ons, and Mozilla Add-ons (AMO).
 ```
 TextAid adds a minimalist AI toolbar to every page. Select text, then
 summarize, rewrite, translate to 16 languages, or expand it — using
-your own OpenAI or Gemini key. Local-first, no servers.
+your own OpenAI, Gemini, or Claude key. Local-first, no servers.
 ```
 
 ## 3. Long description (Chrome Web Store, Edge, AMO)
@@ -48,14 +48,15 @@ Three direct keyboard shortcuts:
   • Ctrl+Shift+Y (Cmd+Shift+Y) → open the toolbar on the current selection
 
 — Bring your own AI —
-TextAid talks directly to OpenAI or Google Gemini from your browser,
-using your own API key. There is no TextAid server, no proxy, no
-account, no signup. Gemini has a generous free tier; OpenAI is
-pay-per-use.
+TextAid talks directly to OpenAI, Google Gemini, or Anthropic Claude
+from your browser, using your own API key. There is no TextAid server,
+no proxy, no account, no signup. Gemini has a generous free tier;
+OpenAI and Claude are pay-per-use.
 
-Supported models (April 2026):
+Supported models (May 2026):
   • Gemini 2.5 Flash / Flash-Lite / Pro, Gemini 3 Flash / Pro
   • GPT-4o-mini, GPT-4o, GPT-4.1 (nano/mini/full), GPT-5 (mini/full)
+  • Claude Haiku 4.5 (default), Claude Sonnet 4.6, Claude Opus 4.7
 
 — Privacy by design —
   • Your API key is stored only in your browser's encrypted storage
@@ -153,7 +154,7 @@ Then certify all three boxes:
 ```
 TextAid lets the user run AI writing actions (summarize, rewrite,
 translate, expand) on text they select on any web page, using their own
-OpenAI or Gemini API key.
+OpenAI, Google Gemini, or Anthropic Claude API key.
 ```
 
 ---
@@ -162,32 +163,25 @@ OpenAI or Gemini API key.
 
 | Asset | Spec | Status |
 | --- | --- | --- |
-| Extension ZIPs | `dist/textaid-chrome-1.2.0.zip`, `dist/textaid-firefox-1.2.0.zip` | ✅ produced by `npm run build` |
+| Extension ZIPs | `dist/textaid-chrome-1.4.0.zip`, `dist/textaid-firefox-1.4.0.zip` | ✅ produced by `npm run build` |
 | Privacy policy URL | Public HTTPS URL | ✅ `PRIVACY.md` on `main` branch |
 | Icon 128×128 | PNG | ✅ `icons/icon-textaid.png` |
-| Icon 300×300 (Edge logo) | PNG, transparent background recommended | ⚠️ to upscale from `icons/icon-textaid.png` |
-| Small promo tile (Chrome) | 440×280 PNG | ⚠️ to design |
-| Marquee tile (Chrome, optional) | 1400×560 PNG | ⚠️ to design |
-| Screenshots Chrome / Edge | 1280×800 or 640×400 PNG, 1–5 images | ⚠️ to capture |
-| Screenshots AMO | 2400×1800 max, at least 1 | ⚠️ to capture |
-
-Suggested screenshots to take (in order):
-
-1. Floating toolbar appearing over a paragraph the user just selected.
-2. Summarize result modal with bullet points.
-3. Translate-to submenu with the 16 languages visible.
-4. Settings popup showing the provider/model dropdown with Free/Paid badges.
-5. Context-menu entry "TextAid → Rewrite".
+| Icon 300×300 (Edge logo) | PNG, transparent background recommended | ✅ `store-assets/icon-300.png` (run `npm run assets`) |
+| Small promo tile (Edge/CWS) | 440×280 PNG | ✅ `store-assets/promo-440x280.png` (run `npm run assets`) |
+| Marquee tile (optional) | 1400×560 PNG | ✅ `store-assets/promo-1400x560.png` (run `npm run assets`) |
+| Screenshots Chrome / Edge | 1280×800 or 640×400 PNG, 1–5 images | ⚠️ capture manually — see `store-assets/SCREENSHOT_GUIDE.md` |
+| Screenshots AMO | 2400×1800 max, at least 1 | ⚠️ capture manually — see `store-assets/SCREENSHOT_GUIDE.md` |
 
 ---
 
 ## 7. Submission order (recommended)
 
 1. **Firefox AMO** — fastest auto-review, gets you a real public listing
-   URL within minutes that the other stores will sometimes ask for as a
+   URL within minutes that Edge will sometimes ask for as a
    "where else is this published" reference.
+   Use the automated CI workflow: `.github/workflows/publish-amo.yml`.
 2. **Microsoft Edge Add-ons** — free, 1–7 day review.
-3. **Chrome Web Store** — $5 one-time fee, 1–3 day review.
+   Use the automated CI workflow: `.github/workflows/publish-edge.yml`.
 
 ---
 
@@ -200,16 +194,18 @@ To test:
   1. Install the extension.
   2. Open the popup and paste a Google AI Studio Gemini API key
      (free, https://aistudio.google.com/app/apikey).
-     Alternatively an OpenAI key starting with sk-... will also work.
+     Alternatively an OpenAI key (sk-...) or an Anthropic Claude key
+     (sk-ant-...) will also work.
   3. On any page (e.g. https://en.wikipedia.org), select a paragraph,
      then either:
        - press Alt+Shift+S to summarize, or
        - right-click → TextAid → Summarize.
   4. A result modal will appear with the AI-generated summary.
 
-All network traffic goes directly from the browser to either
-api.openai.com or generativelanguage.googleapis.com. The extension makes
-no requests to any other host. No remote code is loaded at runtime.
+All network traffic goes directly from the browser to one of:
+  api.openai.com, generativelanguage.googleapis.com, or api.anthropic.com.
+The extension makes no requests to any other host.
+No remote code is loaded at runtime.
 
 Source code: https://github.com/kenny516/TextAid
 Privacy policy: https://github.com/kenny516/TextAid/blob/main/PRIVACY.md

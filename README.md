@@ -59,11 +59,9 @@ Get a key:
 
 ### From the stores
 
-When the extension is published, install from your browser's official store:
-
-- Chrome / Brave / Opera / Arc / Vivaldi → Chrome Web Store
-- Edge → Microsoft Edge Add-ons
-- Firefox / Zen / LibreWolf → addons.mozilla.org
+- Firefox / Zen / LibreWolf → [addons.mozilla.org](https://addons.mozilla.org) _(coming soon)_
+- Edge → [Microsoft Edge Add-ons](https://microsoftedge.microsoft.com/addons) _(coming soon)_
+- Chrome / Brave / Arc / Vivaldi → install from the `.zip` below until the CWS listing is live
 
 ### From source (development)
 

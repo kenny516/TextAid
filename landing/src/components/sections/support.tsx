@@ -1,9 +1,13 @@
+import { useReveal } from "../../lib/use-reveal";
+
 const SPONSORS = "https://github.com/sponsors/kenny516";
 
 export function Support() {
+    const ref = useReveal<HTMLDivElement>();
+
     return (
         <section id="support" className="px-6 py-24 sm:py-32">
-            <div className="mx-auto max-w-5xl">
+            <div ref={ref} className="reveal-scroll mx-auto max-w-5xl">
                 <div className="grid gap-10 md:grid-cols-[1fr_1.2fr] md:gap-16">
                     <div>
                         <span className="eyebrow">Free forever</span>

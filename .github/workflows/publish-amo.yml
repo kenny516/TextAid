@@ -1,0 +1,53 @@
+name: Publish — Firefox AMO
+
+# Triggered automatically when a vX.Y.Z tag is pushed (same event as release.yml).
+# Requires two repository secrets:
+#   AMO_JWT_ISSUER    — your Mozilla API issuer (e.g. user:12345678:123)
+#   AMO_JWT_SECRET    — your Mozilla API secret
+#
+# Create them at: https://addons.mozilla.org/developers/addon/api/key/
+# Then add them in: GitHub repo → Settings → Secrets and variables → Actions
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  publish-amo:
+    name: Sign & submit to addons.mozilla.org
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci || npm install
+
+      - name: Build Firefox extension
+        run: npm run build:firefox
+
+      - name: Read version
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Install web-ext
+        run: npm install -g web-ext
+
+      - name: Sign & submit to AMO
+        env:
+          AMO_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER }}
+          AMO_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET }}
+        run: |
+          web-ext sign \
+            --source-dir dist/firefox \
+            --artifacts-dir dist/amo-signed \
+            --api-key "$AMO_JWT_ISSUER" \
+            --api-secret "$AMO_JWT_SECRET" \
+            --channel listed

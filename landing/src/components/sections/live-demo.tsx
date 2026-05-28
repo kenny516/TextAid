@@ -1,4 +1,9 @@
+import { useReveal } from "../../lib/use-reveal";
+
 export function LiveDemo() {
+    const headingRef = useReveal<HTMLDivElement>();
+    const gridRef = useReveal<HTMLDivElement>(0.05);
+
     const steps = [
         {
             n: "01",
@@ -23,14 +28,14 @@ export function LiveDemo() {
     return (
         <section id="demo" className="px-6 py-24 sm:py-32">
             <div className="mx-auto max-w-5xl">
-                <div className="mb-14 max-w-xl">
+                <div ref={headingRef} className="reveal-scroll mb-14 max-w-xl">
                     <span className="eyebrow">How it feels</span>
                     <h2 className="display-lg mt-3 text-white">
                         Three gestures, zero friction.
                     </h2>
                 </div>
 
-                <div className="grid gap-px overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.08] sm:grid-cols-3">
+                <div ref={gridRef} className="reveal-scroll grid gap-px overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.08] sm:grid-cols-3 [transition-delay:100ms]">
                     {steps.map((s) => (
                         <article key={s.n} className="bg-[#0a0a0a] p-8">
                             <span className="font-mono text-[0.7rem] tracking-[0.22em] uppercase text-muted">

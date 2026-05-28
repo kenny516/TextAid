@@ -1,8 +1,13 @@
+import { useReveal } from "../../lib/use-reveal";
+
 export function Providers() {
+    const headingRef = useReveal<HTMLDivElement>();
+    const gridRef = useReveal<HTMLDivElement>(0.05);
+
     return (
         <section id="providers" className="px-6 py-24 sm:py-32">
             <div className="mx-auto max-w-5xl">
-                <div className="mb-12 max-w-xl">
+                <div ref={headingRef} className="reveal-scroll mb-12 max-w-xl">
                     <span className="eyebrow">Bring your own intelligence</span>
                     <h2 className="display-lg mt-3 text-white">
                         Three providers. Your keys, your call.
@@ -14,11 +19,11 @@ export function Providers() {
                     </p>
                 </div>
 
-                <div className="grid gap-6 lg:grid-cols-3">
+                <div ref={gridRef} className="reveal-scroll grid gap-6 lg:grid-cols-3 [transition-delay:100ms]">
                     <ProviderCard
                         name="Google Gemini"
                         tag="Recommended · Free tier"
-                        model="gemini-1.5-flash · gemini-2.0-flash"
+                        model="gemini-2.5-flash · gemini-2.5-pro"
                         quota="15 req/min · 1,500/day · 1M tokens/month"
                         href="https://aistudio.google.com/app/apikey"
                         icon="/icons/google-gemini.svg"

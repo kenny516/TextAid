@@ -5,7 +5,9 @@ import {
     Zap,
     MousePointer2,
     Key,
+    Languages,
 } from "lucide-react";
+import { useReveal } from "../../lib/use-reveal";
 
 const items = [
     {
@@ -22,6 +24,11 @@ const items = [
         icon: ChevronsUpDown,
         title: "Expand a single thought",
         body: "Turn one sentence into a paragraph — or a 3-bullet outline you can edit in place.",
+    },
+    {
+        icon: Languages,
+        title: "Translate to 16 languages",
+        body: "Spanish, French, Japanese, Arabic, and 12 more. Your selected text, instantly localized.",
     },
     {
         icon: Zap,
@@ -41,21 +48,31 @@ const items = [
 ];
 
 export function Features() {
+    const headingRef = useReveal<HTMLDivElement>();
+    const gridRef = useReveal<HTMLDivElement>(0.05);
+
     return (
         <section id="features" className="px-6 py-24 sm:py-32">
             <div className="mx-auto max-w-5xl">
-                <div className="mb-14 max-w-xl">
+                <div ref={headingRef} className="reveal-scroll mb-14 max-w-xl">
                     <span className="eyebrow">Capabilities</span>
                     <h2 className="display-lg mt-3 text-white">
-                        Six tools, one pane.
+                        Seven tools, one pane.
                     </h2>
                 </div>
 
-                <div className="grid gap-px overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.08] sm:grid-cols-2 lg:grid-cols-3">
-                    {items.map((item) => {
+                <div ref={gridRef} className="reveal-scroll grid gap-px overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.08] sm:grid-cols-2 lg:grid-cols-3 [transition-delay:100ms]">
+                    {items.map((item, i) => {
                         const Icon = item.icon;
+                        const isLast = i === items.length - 1;
                         return (
-                            <div key={item.title} className="light-card bg-[#0a0a0a] p-8">
+                            <div
+                                key={item.title}
+                                className={
+                                    "card-hover light-card bg-[#0a0a0a] p-8 transition-colors hover:bg-white/[0.03]" +
+                                    (isLast ? " sm:col-span-2 lg:col-span-3" : "")
+                                }
+                            >
                                 <Icon size={18} className="text-white" strokeWidth={1.6} />
                                 <h3 className="mt-6 text-[1rem] font-medium tracking-[-0.01em] text-white">
                                     {item.title}

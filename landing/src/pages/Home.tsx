@@ -1,6 +1,7 @@
 import { Helmet } from "react-helmet-async";
 import { Navbar } from "../components/sections/navbar";
 import { Hero } from "../components/sections/hero";
+import { StatsBar } from "../components/sections/stats-bar";
 import { LiveDemo } from "../components/sections/live-demo";
 import { Features } from "../components/sections/features";
 import { Providers } from "../components/sections/providers";
@@ -30,6 +31,7 @@ export function Home() {
             <Navbar />
             <main>
                 <Hero />
+                <StatsBar />
                 <LiveDemo />
                 <Features />
                 <Providers />
