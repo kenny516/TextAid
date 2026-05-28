@@ -6,10 +6,20 @@ export function Hero() {
     return (
         <section
             id="top"
-            className="px-6 pt-32 pb-20 sm:pt-40"
+            className="relative overflow-hidden px-6 pt-32 pb-20 sm:pt-40"
         >
-            <div className="mx-auto max-w-5xl text-center">
-                <span className="eyebrow">v1.4.0 · Free, open source</span>
+            {/* Dot grid background */}
+            <div className="hero-dot-grid" aria-hidden="true" />
+            {/* Ambient glow */}
+            <div className="hero-glow" aria-hidden="true" />
+
+            <div className="relative mx-auto max-w-5xl text-center">
+                <div className="reveal flex justify-center">
+                    <span className="hero-badge">
+                        <span className="hero-badge-dot" aria-hidden="true" />
+                        v1.4.0 · Free, open source
+                    </span>
+                </div>
 
                 <div className="mt-6">
                     <SplitText
@@ -25,12 +35,12 @@ export function Hero() {
                     />
                 </div>
 
-                <p className="reveal mx-auto mt-6 max-w-[580px] text-soft">
+                <p className="reveal-1 mx-auto mt-6 max-w-[580px] text-soft">
                     A quiet writing layer for your browser. Summarize, rewrite, and expand
                     text on any page — without ever leaving the tab.
                 </p>
 
-                <div className="reveal mt-8 flex flex-wrap items-center justify-center gap-3">
+                <div className="reveal-2 mt-8 flex flex-wrap items-center justify-center gap-3">
                     <Button size="lg" variant="primary" asChild>
                         <a href="#install">Install TextAid</a>
                     </Button>
@@ -45,12 +55,12 @@ export function Hero() {
                     </Button>
                 </div>
 
-                <p className="reveal mt-6 font-mono text-[11px] tracking-[0.18em] text-muted uppercase">
+                <p className="reveal-3 mt-6 font-mono text-[11px] tracking-[0.18em] text-muted uppercase">
                     Bring your own key · Gemini, GPT-4o &amp; Claude · Works on every site
                 </p>
             </div>
 
-            <div className="reveal mx-auto mt-20 max-w-5xl">
+            <div className="reveal-4 mx-auto mt-20 max-w-5xl">
                 <ExtensionMockup />
             </div>
         </section>
