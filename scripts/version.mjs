@@ -10,6 +10,7 @@
  *   - package.json
  *   - manifest.json
  *   - landing/package.json
+ *   - package-lock.json and landing/package-lock.json
  *
  * Does NOT git commit or git tag — that lives in RELEASING.md so we keep
  * the bump and the changelog edit in the same intentional commit.
@@ -26,6 +27,8 @@ const TARGETS = [
     { path: "package.json", label: "extension" },
     { path: "manifest.json", label: "manifest" },
     { path: "landing/package.json", label: "landing" },
+    { path: "package-lock.json", label: "lockfile" },
+    { path: "landing/package-lock.json", label: "landing lock" },
 ];
 
 function readJson(p) {
@@ -65,6 +68,7 @@ console.log(`TextAid ${current} → ${next}\n`);
 for (const t of TARGETS) {
     const j = readJson(t.path);
     j.version = next;
+    if (j.packages?.[""]) j.packages[""].version = next;
     writeJson(t.path, j);
     console.log(`  ✓ ${t.label.padEnd(10)} ${t.path}`);
 }
